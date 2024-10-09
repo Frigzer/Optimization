@@ -46,7 +46,21 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			p[1] = m2d(X1.x);
 			return p;
 		}
-
+		if (X1.y > X0.y)
+		{
+			d = -d;
+			X1.x = X0.x + d;
+			X1.fit_fun(ff, ud1, ud2);
+			if (X1.y >= X0.y)
+			{
+				p[0] = m2d(X1.x);
+				p[1] = m2d(X0.x - d);
+				return p;
+			}
+		}
+		do {
+			if()
+		}
 		return p;
 	}
 	catch (string ex_info)

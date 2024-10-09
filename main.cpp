@@ -68,7 +68,9 @@ void lab0()
 
 void lab1()
 {
-	
+	double x0 = 1, alpha = 2, d = 2;
+	int Nmax = 1000;
+	double*p=expansion(ff1T, x0, alpha, Nmax, )
 }
 
 void lab2()
