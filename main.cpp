@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		lab0();
+		lab1();
 	}
 	catch (string EX_INFO)
 	{
@@ -70,7 +70,8 @@ void lab1()
 {
 	double x0 = 1, alpha = 2, d = 2;
 	int Nmax = 1000;
-	double*p=expansion(ff1T, x0, alpha, Nmax, )
+	double* p = expansion(ff1T, x0, d, alpha, Nmax);
+	cout << p[0] << p[1];
 }
 
 void lab2()

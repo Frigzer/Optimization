@@ -35,8 +35,8 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 	try
 	{
 		double* p = new double[2]{ 0,0 };
-		//Tu wpisz kod funkcji
-
+		int i = 0;
+		double temp = 0;
 		solution X0(x0), X1(x0 + d);
 		X0.fit_fun(ff, ud1, ud2);
 		X1.fit_fun(ff, ud1, ud2);
@@ -46,6 +46,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			p[1] = m2d(X1.x);
 			return p;
 		}
+		
 		if (X1.y > X0.y)
 		{
 			d = -d;
@@ -58,9 +59,29 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 				return p;
 			}
 		}
-		do {
-			if()
+		do
+		{
+			if (solution::f_calls > Nmax)
+			{
+				X0.flag = 0;
+				return 0;
+			}	
+			i = i + 1;
+			temp = m2d(X0.x);
+			X1 = X0.x + pow(alpha, i) * d;
+			X1.fit_fun(ff, ud1, ud2);
+		} while (X0.y <= X1.y);
+		if (d > 0)
+		{
+			p[0] = temp;
+			p[1] = m2d(X1.x);
 		}
+		else
+		{
+			p[1] = temp;
+			p[0] = m2d(X1.x);
+		}
+
 		return p;
 	}
 	catch (string ex_info)
