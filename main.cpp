@@ -71,7 +71,11 @@ void lab1()
 	double x0 = 1, alpha = 2, d = 2;
 	int Nmax = 1000;
 	double* p = expansion(ff1T, x0, d, alpha, Nmax);
-	cout << p[0] << p[1];
+	//cout << p[0] << p[1];
+
+	double a = -30, b = 10, epsilon = 0.01;
+	solution xopt = fib(ff1T, a, b, epsilon);
+	cout << m2d(xopt.x) << " " << m2d(xopt.y);
 }
 
 void lab2()

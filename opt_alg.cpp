@@ -95,9 +95,57 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		solution a0(a), b0(b);
+		a0.fit_fun(ff, ud1, ud2);
+		b0.fit_fun(ff, ud1, ud2);
+		solution c(0), d(0);
+		//int k;
+		//k = ceil((m2d(b0.x) - m2d(a0.x)) / epsilon);
+		int k = 1;
+		while (GetFib(k) < (b0.x - a0.x) / epsilon) {
+			k++;
+		}
+		if (GetFib(k - 1) == 0 || GetFib(k) == 0) {
+			throw std::runtime_error("Division by zero in Fibonacci calculation");
+		}
+		c.x = a0.x + (static_cast<double>(GetFib(k - 2)) / GetFib(k)) * (b0.x - a0.x);
+		d.x = a0.x + (static_cast<double>(GetFib(k - 1)) / GetFib(k)) * (b0.x - a0.x);
 
+		c.fit_fun(ff, ud1, ud2);
+		d.fit_fun(ff, ud1, ud2);
+		for (int i = 0; i < k - 3; i++)
+		{
+			cout << "Iteracja " << i << ": c.x = " << m2d(c.x) << ", d.x = " << m2d(d.x) << endl;
+			cout << "Wartoœci funkcji: c.y = " << m2d(c.y) << ", d.y = " << m2d(d.y) << endl;
+
+			
+
+			if (c.y < d.y)
+			{
+				b0 = d;
+				//b0.fit_fun(ff, ud1, ud2);
+			}
+			else
+			{
+				a0 = c;
+				//a0.fit_fun(ff, ud1, ud2);
+			}
+
+			if (k - i - 2 < 0 || k - i - 1 < 0) {
+				throw std::runtime_error("Invalid Fibonacci index");
+			}
+			c.x = b0.x - ((static_cast<double>(GetFib(k - i - 2)) / GetFib(k - i - 1)) * (b0.x - a0.x));
+			d.x = a0.x + b0.x - c.x;
+			c.fit_fun(ff, ud1, ud2);
+			d.fit_fun(ff, ud1, ud2);
+
+			if (fabs(m2d(b0.x) - m2d(a0.x)) < epsilon) {
+				break;
+			}
+		}
+		Xopt = c;
 		return Xopt;
+		
 	}
 	catch (string ex_info)
 	{

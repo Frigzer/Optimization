@@ -39,3 +39,23 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2)
 	y = pow(x, 2);
 	return y;
 }
+
+std::vector<int> generate_fibonacci(double length, double epsilon) {
+	std::vector<int> fib = { 1, 1 };  // Pocz¹tkowe wartoœci ci¹gu Fibonacciego
+	while (fib.back() < length / epsilon) {
+		fib.push_back(fib[fib.size() - 1] + fib[fib.size() - 2]);
+	}
+	return fib;
+}
+
+unsigned long long GetFib(int n) {
+	if (n <= 1) return n;
+	unsigned long long a = 0, b = 1, c;
+	for (int i = 2; i <= n; ++i) {
+		c = a + b;
+		a = b;
+		b = c;
+	}
+	return b;
+}
+
