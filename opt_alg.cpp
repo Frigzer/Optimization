@@ -99,8 +99,6 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		a0.fit_fun(ff, ud1, ud2);
 		b0.fit_fun(ff, ud1, ud2);
 		solution c(0), d(0);
-		//int k;
-		//k = ceil((m2d(b0.x) - m2d(a0.x)) / epsilon);
 		int k = 1;
 		while (GetFib(k) < (b0.x - a0.x) / epsilon) {
 			k++;
@@ -108,8 +106,8 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		if (GetFib(k - 1) == 0 || GetFib(k) == 0) {
 			throw std::runtime_error("Division by zero in Fibonacci calculation");
 		}
-		c.x = a0.x + (static_cast<double>(GetFib(k - 2)) / GetFib(k)) * (b0.x - a0.x);
-		d.x = a0.x + (static_cast<double>(GetFib(k - 1)) / GetFib(k)) * (b0.x - a0.x);
+		c.x = b0.x - (static_cast<double>(GetFib(k - 1)) / GetFib(k)) * (b0.x - a0.x);
+		d.x = a0.x + b0.x - c.x;
 
 		c.fit_fun(ff, ud1, ud2);
 		d.fit_fun(ff, ud1, ud2);
@@ -123,12 +121,10 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			if (c.y < d.y)
 			{
 				b0 = d;
-				//b0.fit_fun(ff, ud1, ud2);
 			}
 			else
 			{
 				a0 = c;
-				//a0.fit_fun(ff, ud1, ud2);
 			}
 
 			if (k - i - 2 < 0 || k - i - 1 < 0) {
