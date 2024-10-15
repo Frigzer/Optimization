@@ -116,8 +116,6 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			cout << "Iteracja " << i << ": c.x = " << m2d(c.x) << ", d.x = " << m2d(d.x) << endl;
 			cout << "Wartoœci funkcji: c.y = " << m2d(c.y) << ", d.y = " << m2d(d.y) << endl;
 
-			
-
 			if (c.y < d.y)
 			{
 				b0 = d;
@@ -155,8 +153,97 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		int i = 0;
+		double c = (a + b) / 2, l, m;
+		solution a0(a), b0(b), c0(c), d0(0);
 
+		a0.fit_fun(ff, ud1, ud2);
+		b0.fit_fun(ff, ud1, ud2);
+		c0.fit_fun(ff, ud1, ud2);
+
+		do
+		{
+			l = m2d(a0.y) * m2d(pow(b0.y, 2) - pow(c0.y, 2)) + 
+				m2d(b0.y) * m2d(pow(c0.y, 2) - pow(a0.y, 2)) + 
+				m2d(c0.y) * m2d(pow(a0.y, 2) - pow(b0.y, 2));
+
+			m = m2d(a0.y) * m2d(b0.x - c0.x) + 
+				m2d(b0.y) * m2d(c0.x - a0.x) + 
+				m2d(c0.y) * m2d(a0.x - b0.x);
+
+			cout << "a0.y: " << m2d(a0.y) << ", b0.y: " << m2d(b0.y) << ", c0.y: " << m2d(c0.y) << endl;
+			cout << "l: " << l << ", m: " << m << endl;
+
+			if (m <= 0)
+			{
+				cout << "Blad!!! m <= 0." << endl;
+				Xopt.flag = false;
+				return 0;
+			}
+			d0.x =  0.5 * l / m;
+
+			if (d0.x < a0.x || d0.x > b0.x)
+			{
+				d0.x = (a0.x + b0.x) / 2;
+			}
+
+			d0.fit_fun(ff, ud1, ud2);
+
+			std::cout << "Iteracja " << i << ": a.x = " << m2d(a0.x)
+				<< ", a.y = " << m2d(a0.y)
+				<< ", b.x = " << m2d(b0.x)
+				<< ", b.y = " << m2d(b0.y)
+				<< ", c.x = " << m2d(c0.x)
+				<< ", c.y = " << m2d(c0.y)
+				<< ", d.x = " << m2d(d0.x)
+				<< ", d.y = " << m2d(d0.y)
+				<< ", l = " << l
+				<< ", m = " << m << std::endl;
+
+			if (a0.x < d0.x && d0.x <= c0.x)
+			{
+				if (d0.y < c0.y)
+				{
+					b0 = c0;
+					c0 = d0;
+				}
+				else
+				{
+					a0 = d0;
+				}
+			}
+			else
+			{
+				if (c0.x <= d0.x && d0.x < b0.x)
+				{
+					if (d0.y < c0.y)
+					{
+						a0 = c0;
+						c0 = d0;
+					}
+					else
+					{
+						b0 = d0;
+					}
+				}
+				else
+				{
+					cout << "Blad! d0.x poza zakresem." << endl;
+					Xopt.flag = false;
+					return 0;
+				}
+			}
+
+			i = i + 1;
+			if (solution::f_calls > Nmax)
+			{
+				Xopt.flag = false;
+				return 0;
+			}
+			
+		} while ((b0.x - a0.x) > epsilon && fabs(m2d(d0.x) - m2d(c0.x)) >= gamma);
+
+		Xopt = d0;
 		return Xopt;
 	}
 	catch (string ex_info)

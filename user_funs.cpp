@@ -40,12 +40,11 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2)
 	return y;
 }
 
-std::vector<int> generate_fibonacci(double length, double epsilon) {
-	std::vector<int> fib = { 1, 1 };  // Pocz¹tkowe wartoœci ci¹gu Fibonacciego
-	while (fib.back() < length / epsilon) {
-		fib.push_back(fib[fib.size() - 1] + fib[fib.size() - 2]);
-	}
-	return fib;
+matrix ff1T2(matrix x, matrix ud1, matrix ud2)
+{
+	matrix y;
+	y = pow(x - 2, 2) + 3;
+	return y;
 }
 
 unsigned long long GetFib(int n) {
