@@ -145,7 +145,6 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 	{
 		throw ("solution fib(...):\n" + ex_info);
 	}
-
 }
 
 solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1, matrix ud2)
@@ -178,6 +177,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			{
 				cout << "Blad!!! m <= 0." << endl;
 				Xopt.flag = false;
+				break;
 				return 0;
 			}
 			d0.x =  0.5 * l / m;
@@ -241,7 +241,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				return 0;
 			}
 			
-		} while ((b0.x - a0.x) > epsilon && fabs(m2d(d0.x) - m2d(c0.x)) >= gamma);
+		} while ((b0.x - a0.x) > epsilon || fabs(m2d(d0.x) - m2d(c0.x)) >= gamma);
 
 		Xopt = d0;
 		return Xopt;

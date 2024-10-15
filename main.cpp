@@ -68,19 +68,17 @@ void lab0()
 
 void lab1()
 {
-	//double x0 = 1, alpha = 2, d = 2;
-	//int Nmax = 1000;
-	//double* p = expansion(ff1T, x0, d, alpha, Nmax);
-	//cout << p[0] << p[1];
+	double x0 = 60, alpha = 2, d = 2;
+	int Nmax = 1000;
+	double* p = expansion(ff1T, x0, d, alpha, Nmax);
 
-	//double a = -30, b = 10, epsilon = 0.01;
-	//solution xopt = fib(ff1T2, a, b, epsilon);
-	//cout << m2d(xopt.x) << " " << m2d(xopt.y);
+	//double a = 40, b = 60, epsilon = 0.001;
+	//solution xopt = fib(ff1T, p[0], p[1], epsilon);
+	//cout << m2d(xopt.x) << " " << m2d(xopt.y) << endl;
 
 	double a = -100, b = 100, epsilon = 0.01, gamma = 0.0001;
-	int Nmax = 1000;
-	solution xopt = lag(ff1T2, a, b, epsilon, gamma, Nmax);
-	cout << m2d(xopt.x) << " " << m2d(xopt.y);
+	solution xopt = lag(ff1T, p[0], p[1], epsilon, gamma, Nmax);
+	cout << m2d(xopt.x) << " " << m2d(xopt.y) << endl;
 }
 
 void lab2()
