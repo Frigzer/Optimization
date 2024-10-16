@@ -55,7 +55,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			if (X1.y >= X0.y)
 			{
 				p[0] = m2d(X1.x);
-				p[1] = m2d(X0.x - d);
+				p[1] = m2d(X0.x) - d;
 				return p;
 			}
 		}
@@ -68,6 +68,9 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			}	
 			i = i + 1;
 			temp = m2d(X0.x);
+
+			//X0 = X1; //
+
 			X1 = X0.x + pow(alpha, i) * d;
 			X1.fit_fun(ff, ud1, ud2);
 		} while (X0.y <= X1.y);
@@ -111,7 +114,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 		c.fit_fun(ff, ud1, ud2);
 		d.fit_fun(ff, ud1, ud2);
-		for (int i = 0; i < k - 3; i++)
+		for (int i = 0; i <= k - 3; i++)
 		{
 			cout << "Iteracja " << i << ": c.x = " << m2d(c.x) << ", d.x = " << m2d(d.x) << endl;
 			cout << "Wartoœci funkcji: c.y = " << m2d(c.y) << ", d.y = " << m2d(d.y) << endl;
@@ -173,6 +176,17 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			cout << "a0.y: " << m2d(a0.y) << ", b0.y: " << m2d(b0.y) << ", c0.y: " << m2d(c0.y) << endl;
 			cout << "l: " << l << ", m: " << m << endl;
 
+			
+			if (fabs(m) < 1e-12)
+			{
+				d0.x = (a0.x + b0.x) / 2; 
+			}
+			else
+			{
+				d0.x = 0.5 * l / m;
+			}
+
+			/*
 			if (m <= 0)
 			{
 				cout << "Blad!!! m <= 0." << endl;
@@ -180,7 +194,9 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				break;
 				return 0;
 			}
-			d0.x =  0.5 * l / m;
+			*/
+			
+			//d0.x =  0.5 * l / m;
 
 			if (d0.x < a0.x || d0.x > b0.x)
 			{
@@ -200,7 +216,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				<< ", l = " << l
 				<< ", m = " << m << std::endl;
 
-			if (a0.x < d0.x && d0.x <= c0.x)
+			if (a0.x <= d0.x && d0.x <= c0.x)
 			{
 				if (d0.y < c0.y)
 				{
@@ -214,7 +230,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			}
 			else
 			{
-				if (c0.x <= d0.x && d0.x < b0.x)
+				if (c0.x <= d0.x && d0.x <= b0.x)
 				{
 					if (d0.y < c0.y)
 					{
@@ -241,7 +257,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				return 0;
 			}
 			
-		} while ((b0.x - a0.x) > epsilon || fabs(m2d(d0.x) - m2d(c0.x)) >= gamma);
+		} while ((b0.x - a0.x) > epsilon && fabs(m2d(d0.x) - m2d(c0.x)) >= gamma);
 
 		Xopt = d0;
 		return Xopt;
