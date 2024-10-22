@@ -30,6 +30,7 @@ solution MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, do
 	}
 }
 
+
 double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1, matrix ud2)
 {
 	try
@@ -44,6 +45,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 		{
 			p[0] = m2d(X0.x);
 			p[1] = m2d(X1.x);
+
 			return p;
 		}
 		
@@ -56,6 +58,7 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			{
 				p[0] = m2d(X1.x);
 				p[1] = m2d(X0.x) - d;
+
 				return p;
 			}
 		}
@@ -68,12 +71,10 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			}	
 			i = i + 1;
 			temp = m2d(X0.x);
-
-			//X0 = X1; //
-
-			X1 = X0.x + pow(alpha, i) * d;
+			X0 = X1;
+			X1.x = x0 + pow(alpha, i) * d;
 			X1.fit_fun(ff, ud1, ud2);
-		} while (X0.y <= X1.y);
+		} while (X0.y >= X1.y); // <- ??
 		if (d > 0)
 		{
 			p[0] = temp;
@@ -106,18 +107,13 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		while (GetFib(k) < (b0.x - a0.x) / epsilon) {
 			k++;
 		}
-		if (GetFib(k - 1) == 0 || GetFib(k) == 0) {
-			throw std::runtime_error("Division by zero in Fibonacci calculation");
-		}
-		c.x = b0.x - (static_cast<double>(GetFib(k - 1)) / GetFib(k)) * (b0.x - a0.x);
+		c.x = b0.x - GetFib(k - 1) / GetFib(k) * (b0.x - a0.x);
 		d.x = a0.x + b0.x - c.x;
 
 		c.fit_fun(ff, ud1, ud2);
 		d.fit_fun(ff, ud1, ud2);
 		for (int i = 0; i < k - 3; i++)
 		{
-			cout << "Iteracja " << i << ": c.x = " << m2d(c.x) << ", d.x = " << m2d(d.x) << endl;
-			cout << "Wartoœci funkcji: c.y = " << m2d(c.y) << ", d.y = " << m2d(d.y) << endl;
 
 			if (c.y < d.y)
 			{
@@ -128,19 +124,15 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				a0 = c;
 			}
 
-			if (k - i - 2 < 0 || k - i - 1 < 0) {
-				throw std::runtime_error("Invalid Fibonacci index");
-			}
-			c.x = b0.x - ((static_cast<double>(GetFib(k - i - 2)) / GetFib(k - i - 1)) * (b0.x - a0.x));
+			c.x = b0.x - GetFib(k - i - 2) / GetFib(k - i - 1) * (b0.x - a0.x);
 			d.x = a0.x + b0.x - c.x;
 			c.fit_fun(ff, ud1, ud2);
 			d.fit_fun(ff, ud1, ud2);
-
-			if (fabs(m2d(b0.x) - m2d(a0.x)) < epsilon) {
-				break;
-			}
 		}
 		Xopt = c;
+
+		Xopt.flag = 0;
+
 		return Xopt;
 		
 	}
@@ -157,58 +149,72 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		solution Xopt;
 		int i = 0;
 		double l, m;
-		double c = a + std::rand() % (int)(b - a + 1);
-		solution a0(a), b0(b), c0(c), d0(0), di(0);
+		double c = (a + b) / 2.0;
+		solution a0(a), b0(b), c0(c), d0(0), di(a);
 
 		a0.fit_fun(ff, ud1, ud2);
 		b0.fit_fun(ff, ud1, ud2);
 		c0.fit_fun(ff, ud1, ud2);
 
-		cout << m2d(c0.x) << endl;
+		// Inicjacja zapisu do pliku
+		std::ofstream logFile("lag_log.txt", std::ios::out);
+		if (logFile.is_open()) {
+			logFile << "Pocz¹tek algorytmu:\n";
+			logFile << "a0.x = " << a0.x << ", a0.y = " << a0.y << "\n";
+			logFile << "b0.x = " << b0.x << ", b0.y = " << b0.y << "\n";
+			logFile << "c0.x = " << c0.x << ", c0.y = " << c0.y << "\n\n";
+			logFile.close();
+		}
 
 		do
 		{
-			l = m2d(a0.y) * m2d(pow(b0.x, 2) - pow(c0.x, 2)) + 
-				m2d(b0.y) * m2d(pow(c0.x, 2) - pow(a0.x, 2)) + 
+			l = m2d(a0.y) * m2d(pow(b0.x, 2) - pow(c0.x, 2)) +
+				m2d(b0.y) * m2d(pow(c0.x, 2) - pow(a0.x, 2)) +
 				m2d(c0.y) * m2d(pow(a0.x, 2) - pow(b0.x, 2));
 
-			m = m2d(a0.y) * m2d(b0.x - c0.x) + 
-				m2d(b0.y) * m2d(c0.x - a0.x) + 
+			m = m2d(a0.y) * m2d(b0.x - c0.x) +
+				m2d(b0.y) * m2d(c0.x - a0.x) +
 				m2d(c0.y) * m2d(a0.x - b0.x);
 
-			cout << "a0.y: " << m2d(a0.y) << ", b0.y: " << m2d(b0.y) << ", c0.y: " << m2d(c0.y) << endl;
-			cout << "l: " << l << ", m: " << m << endl;
-			
+			// Zapis do pliku l i m
+			logFile.open("lag_log.txt", std::ios::app);
+			if (logFile.is_open()) {
+				logFile << "Iteracja " << i << ":\n";
+				logFile << "l = " << l << ", m = " << m << "\n";
+				logFile.close();
+			}
+
 			if (m <= 0)
 			{
-				Xopt = NAN;
-				cout << "Blad!!! m <= 0." << endl;
 				Xopt.flag = -1;
+				// Zapis b³êdu do pliku
+				logFile.open("lag_log.txt", std::ios::app);
+				if (logFile.is_open()) {
+					logFile << "B³¹d: m <= 0.\n\n";
+					logFile.close();
+				}
 				return Xopt;
 			}
-				
+
 			di.x = d0.x;
-			d0.x =  0.5 * l / m;
+			d0.x = 0.5 * l / m;
 			d0.fit_fun(ff, ud1, ud2);
 			di.fit_fun(ff, ud1, ud2);
 
-			std::cout << "Iteracja " << i << ": a.x = " << m2d(a0.x)
-				<< ", a.y = " << m2d(a0.y)
-				<< ", b.x = " << m2d(b0.x)
-				<< ", b.y = " << m2d(b0.y)
-				<< ", c.x = " << m2d(c0.x)
-				<< ", c.y = " << m2d(c0.y)
-				<< ", d.x = " << m2d(d0.x)
-				<< ", d.y = " << m2d(d0.y)
-				<< ", l = " << l
-				<< ", m = " << m << std::endl;
+			// Zapis d0 i di do pliku
+			logFile.open("lag_log.txt", std::ios::app);
+			if (logFile.is_open()) {
+				logFile << "d0.x = " << d0.x << ", d0.y = " << d0.y << "\n";
+				logFile << "di.x = " << di.x << ", di.y = " << di.y << "\n\n";
+				logFile.close();
+			}
 
 			if (a0.x < d0.x && d0.x < c0.x)
 			{
 				if (d0.y < c0.y)
 				{
-					c0 = d0;
 					b0 = c0;
+					c0 = d0;
 				}
 				else
 				{
@@ -231,23 +237,57 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				}
 				else
 				{
-					cout << "Blad! d0.x poza zakresem." << endl;
-					Xopt.flag = false;
-					return 0;
+					// Zapis b³êdu do pliku
+					logFile.open("lag_log.txt", std::ios::app);
+					if (logFile.is_open()) {
+						logFile << "B³¹d: d0.x poza zakresem.\n\n";
+						logFile.close();
+					}
+					Xopt = d0;
+					Xopt.flag = -1;
+					return Xopt;
 				}
 			}
 
 			i = i + 1;
+			Xopt.ud.add_row((b0.x - a0.x));
+
+			// Zapis punktów do pliku
+			logFile.open("lag_log.txt", std::ios::app);
+			if (logFile.is_open()) {
+				logFile << "Po aktualizacji:\n";
+				logFile << "a0.x = " << a0.x << ", a0.y = " << a0.y << "\n";
+				logFile << "b0.x = " << b0.x << ", b0.y = " << b0.y << "\n";
+				logFile << "c0.x = " << c0.x << ", c0.y = " << c0.y << "\n";
+				logFile << "d0.x = " << d0.x << ", d0.y = " << d0.y << "\n\n";
+				logFile.close();
+			}
+
 			if (solution::f_calls > Nmax)
 			{
-				Xopt.flag = false;
-				return 0;
+				// Zapis b³êdu do pliku
+				logFile.open("lag_log.txt", std::ios::app);
+				if (logFile.is_open()) {
+					logFile << "B³¹d: Nie znaleziono przedzia³u po " << Nmax << " próbach.\n\n";
+					logFile.close();
+				}
+				throw std::runtime_error("Nie znaleziono przedzialu po " + std::to_string(Nmax) + " probach");
 			}
-			//Xopt.ud.add_row
-			
-		} while ((b0.x - a0.x) < epsilon || fabs(m2d(d0.x) - m2d(di.x)) < gamma);
+
+		} while ((b0.x - a0.x) >= epsilon && fabs(m2d(d0.x) - m2d(di.x)) >= gamma);
 
 		Xopt = d0;
+		Xopt.fit_fun(ff, ud1, ud2);
+
+		// Zapis wyniku do pliku
+		logFile.open("lag_log.txt", std::ios::app);
+		if (logFile.is_open()) {
+			logFile << "Zakoñczenie algorytmu:\n";
+			logFile << "Xopt.x = " << Xopt.x << ", Xopt.y = " << Xopt.y << "\n\n";
+			logFile.close();
+		}
+		Xopt.flag = 0;
+
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -255,6 +295,7 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		throw ("solution lag(...):\n" + ex_info);
 	}
 }
+
 
 solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {

@@ -36,14 +36,15 @@ matrix df0(double t, matrix Y, matrix ud1, matrix ud2)
 matrix ff1T(matrix x, matrix ud1, matrix ud2)
 {
 	matrix y;
-	y = -cos(0.1 * m2d(x)) * exp(-pow(0.1 * m2d(x) - 2 * _Pi, 2)) + 0.002 * pow(0.1 * x, 2);
+	double PI = 3.14;
+	y = -cos(0.1 * m2d(x)) * exp(-pow(0.1 * m2d(x) - 2 * PI, 2)) + 0.002 * pow(0.1 * x, 2);
 	//y = pow(x, 2);
 	return y;
 }
 
-unsigned long long GetFib(int n) {
+double GetFib(int n) {
 	if (n <= 1) return n;
-	unsigned long long a = 0, b = 1, c;
+	double a = 0, b = 1, c;
 	for (int i = 2; i <= n; ++i) {
 		c = a + b;
 		a = b;
@@ -52,3 +53,15 @@ unsigned long long GetFib(int n) {
 	return b;
 }
 
+matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	matrix dY(3, 1);
+	double a = 0.98, b = 0.63, g = 9.81;
+	double PA = 0.5;
+	double TA = 90;
+}
+
+matrix ff1R(matrix x, matrix ud1, matrix ud2)
+{
+	
+}
