@@ -68,18 +68,43 @@ void lab0()
 
 void lab1()
 {
-	double x0 = 70, alpha = 2, d = 2;
+	
+	double* ekspansja = new double[2];
+	double x0 = 0.3;
+	double d = 1.0;
 	int Nmax = 1000;
-	double* p = expansion(ff1T, x0, d, alpha, Nmax);
-	cout << p[0] << p[1] << endl;
+	int liczba = 0;
+	double alpha = 3.0, epsilon = 1e-2, gamma = 1e-200;
+	ofstream expToFile("./expansion.txt");
+	ofstream fibToFile("./fibonacci.txt");
+	ofstream lagToFile("./lagrange.txt");
 
-	//double a = -30, b = 60, epsilon = 0.001;
-	//solution xopt = fib(ff1T, a, b, epsilon);
-	//cout << m2d(xopt.x) << " " << m2d(xopt.y) << endl;
+	for (int i = 0; i < 100; i++)
+	{
+		ekspansja = expansion(ff1T, x0, d, alpha, Nmax);
+		cout << ekspansja[0] << endl;
+		expToFile << x0 << "\t" << ekspansja[0] << "\t" << ekspansja[1] << "\t" << solution::f_calls << endl;
+		solution::clear_calls();
 
-	double a = -100, b = 100, epsilon = 0.001, gamma = 0.0001;
-	solution xopt = lag(ff1T, a, b, epsilon, gamma, Nmax);
-	cout << m2d(xopt.x) << " " << m2d(xopt.y) << endl;
+		solution fibonacci = fib(ff1T, ekspansja[0], ekspansja[1], epsilon);
+		fibToFile << m2d(fibonacci.x) << "\t" << m2d(fibonacci.y) << "\t" << solution::f_calls << "\t" << endl;
+		solution::clear_calls();
+
+		solution lagrange = lag(ff1T, ekspansja[0], ekspansja[1], epsilon, gamma, Nmax);
+		lagToFile << m2d(lagrange.x) << "\t" << m2d(lagrange.y) << "\t" << solution::f_calls << "\t" << endl;
+		solution::clear_calls();
+		x0++;
+		liczba = 0;
+	}
+	
+	cout << "fib" << endl;
+	solution opt = fib(ff1T, -100, 100, epsilon);
+	cout << opt << endl;
+
+	cout << "lag" << endl;
+	solution opt2 = lag(ff1T, -100, 100, epsilon, gamma, Nmax);
+	cout << opt2 << endl;
+
 }
 
 void lab2()

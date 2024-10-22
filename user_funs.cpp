@@ -57,11 +57,45 @@ matrix df1(double t, matrix Y, matrix ud1, matrix ud2)
 {
 	matrix dY(3, 1);
 	double a = 0.98, b = 0.63, g = 9.81;
+
 	double PA = 0.5;
 	double TA = 90;
+
+	double PB = 1.0;
+	double TB = 20;
+	double DB = 0.00365665;
+
+	double Fin = 0.1;
+	double Tin = 20.0;
+
+	double Aout = Y(0) > 0 ? a * b * m2d(ud2) * sqrt(2 * g * Y(0) / PA) : 0;
+	double Bout = Y(1) > 1 ? a * b * DB * sqrt(2 * g * Y(1) / PB) : 0;
+
+	dY(0) = -Aout;
+	dY(1) = Aout + Fin - Bout;
+	dY(2) = Fin / Y(1) * (Tin - Y(2)) + Aout / Y(1) * (TA - Y(2));
+
+	return dY;
 }
 
 matrix ff1R(matrix x, matrix ud1, matrix ud2)
 {
-	
+	matrix Y0 = matrix(3, new double[3] {5, 1, 10});
+
+	int t0 = 0;
+	int tend = 2000;
+	int dt = 1;
+
+	matrix* Y = solve_ode(df1, t0, dt, tend, Y0, ud1, x);
+	double max = Y[1](0, 2);
+
+	int length = get_len(Y[0]);
+	double y;
+	for (int i = 1; i < length; i++)
+	{
+		if (max < Y[1](i, 2))
+			max = Y[1](i, 2);
+		y = abs(max - 50);
+	}
+	return y;
 }
