@@ -72,11 +72,14 @@ void lab1()
 
 	double* ekspansja = new double[2];
 	int Nmax = 1000;
-	double epsilon = 1e-2, gamma = 1e-200;
-	ofstream expToFile("./expansion.txt");
-	ofstream fibToFile("./fibonacci.txt");
-	ofstream lagToFile("./lagrange.txt");
+	double epsilon = 1e-05, gamma = 1e-200;
 
+	// Dane to tabeli 1
+	ofstream exp_tab_1("./dane/lab_01/problem_testowy/exp_tab_1.txt");
+	ofstream fib_tab_1("./dane/lab_01/problem_testowy/fib_tab_1.txt");
+	ofstream lag_tab_1("./dane/lab_01/problem_testowy/lag_tab_1.txt");
+
+	// Trzy wpó³czynniki alfa dla ekspansji
 	double alpha, alpha_1 = 3.1, alpha_2 = 5.0, alpha_3 = 6.6;
 	double x0;
 	double d = 2.0;
@@ -89,29 +92,65 @@ void lab1()
 		if (i == 100) alpha = alpha_2;
 		else if (i == 200) alpha = alpha_3;
 		ekspansja = expansion(ff1T, x0, d, alpha, Nmax);
-		expToFile << x0 << "\t" << ekspansja[0] << "\t" << ekspansja[1] << "\t" << solution::f_calls << endl;
+		exp_tab_1 << x0 << "\t" << ekspansja[0] << "\t" << ekspansja[1] << "\t" << solution::f_calls << endl;
 		solution::clear_calls();
 
-		solution fibonacci = fib(ff1T, ekspansja[0], ekspansja[1], epsilon);
-		fibToFile << m2d(fibonacci.x) << "\t" << m2d(fibonacci.y) << "\t" << solution::f_calls << "\t" << fibonacci.flag << endl;
+		solution fib1 = fib(ff1T, ekspansja[0], ekspansja[1], epsilon);
+		fib_tab_1 << m2d(fib1.x) << "\t" << m2d(fib1.y) << "\t" << solution::f_calls << "\t" << fib1.flag << endl;
 		solution::clear_calls();
 
-		solution lagrange = lag(ff1T, ekspansja[0], ekspansja[1], epsilon, gamma, Nmax);
-		lagToFile << m2d(lagrange.x) << "\t" << m2d(lagrange.y) << "\t" << solution::f_calls << "\t" << lagrange.flag << endl;
+		solution lag1 = lag(ff1T, ekspansja[0], ekspansja[1], epsilon, gamma, Nmax);
+		lag_tab_1 << m2d(lag1.x) << "\t" << m2d(lag1.y) << "\t" << solution::f_calls << "\t" << lag1.flag << endl;
 		solution::clear_calls();
-		x0++;
 	}
+	exp_tab_1.close();
+	fib_tab_1.close();
+	lag_tab_1.close();
 
-	ofstream fibWykres("./fibWykres.txt");
-	ofstream lagWykres("./lagWykres.txt");
+	// Dane do wykresu
+	ofstream fib_wykres("./dane/lab_01/problem_testowy/fib_wykres.txt");
+	ofstream lag_wykres("./dane/lab_01/problem_testowy/lag_wykres.txt");
 	
-	solution opt = fib(ff1T, -100, 100, epsilon);
-	fibWykres << opt << "\n\n" << opt.ud << endl;
+	solution fib2 = fib(ff1T, -100, 100, epsilon);
+	fib_wykres << fib2 << "\n\n" << fib2.ud << endl;
+	solution::clear_calls();
 
-	solution opt2 = lag(ff1T, -100, 100, epsilon, gamma, Nmax);
-	lagWykres << opt2 << "\n\n" << opt2.ud << endl;
+	solution lag2 = lag(ff1T, -100, 100, epsilon, gamma, Nmax);
+	lag_wykres << lag2 << "\n\n" << lag2.ud << endl;
+	solution::clear_calls();
 
+	fib_wykres.close();
+	lag_wykres.close();
 
+	// Dane do tabeli 3
+	ofstream fib_tab_3("./dane/lab_01/problem_rzeczywisty/fib_tab_3.txt");
+	ofstream lag_tab_3("./dane/lab_01/problem_rzeczywisty/lag_tab_3.txt");
+
+	solution fib3 = fib(ff1R, 1e-4, 1e-2, epsilon);
+	fib_tab_3 << fib3 << endl;
+	solution::clear_calls();
+
+	solution lag3 = lag(ff1R, 1e-4, 1e-2, epsilon, gamma, Nmax);
+	lag_tab_3 << lag3 << endl;
+	solution::clear_calls();
+
+	fib_tab_3.close();
+	lag_tab_3.close();
+
+	// Dane do symulacji
+	ofstream fib_sym("./dane/lab_01/problem_rzeczywisty/fib_symulacja.csv");
+	ofstream lag_sym("./dane/lab_01/problem_rzeczywisty/lag_symulacja.csv");
+
+	matrix Y0 = matrix(3, new double[3] {5, 1, 20});
+	matrix* Y_fib = solve_ode(df1, 0, 1, 2000, Y0, NAN, fib3.x(0));
+	solution::clear_calls();
+	matrix* Y_lag = solve_ode(df1, 0, 1, 2000, Y0, NAN, lag3.x(0));
+
+	fib_sym << Y_fib[1];
+	lag_sym << Y_lag[1];
+
+	fib_sym.close();
+	lag_sym.close();
 }
 
 void lab2()
