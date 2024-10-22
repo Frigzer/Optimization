@@ -112,6 +112,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 
 		c.fit_fun(ff, ud1, ud2);
 		d.fit_fun(ff, ud1, ud2);
+		Xopt.ud = b - a;
 		for (int i = 0; i < k - 3; i++)
 		{
 
@@ -128,6 +129,7 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			d.x = a0.x + b0.x - c.x;
 			c.fit_fun(ff, ud1, ud2);
 			d.fit_fun(ff, ud1, ud2);
+			Xopt.ud.add_row(m2d(b0.x - a0.x));
 		}
 		Xopt = c;
 
@@ -165,9 +167,10 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			logFile << "c0.x = " << c0.x << ", c0.y = " << c0.y << "\n\n";
 			logFile.close();
 		}
-
+		Xopt.ud = b - a;
 		do
 		{
+			Xopt.ud.add_row(m2d(b0.x - a0.x));
 			l = m2d(a0.y) * m2d(pow(b0.x, 2) - pow(c0.x, 2)) +
 				m2d(b0.y) * m2d(pow(c0.x, 2) - pow(a0.x, 2)) +
 				m2d(c0.y) * m2d(pow(a0.x, 2) - pow(b0.x, 2));

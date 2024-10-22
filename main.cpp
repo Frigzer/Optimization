@@ -68,42 +68,49 @@ void lab0()
 
 void lab1()
 {
-	
+	srand(time(NULL));
+
 	double* ekspansja = new double[2];
-	double x0 = 0.3;
-	double d = 1.0;
 	int Nmax = 1000;
-	int liczba = 0;
-	double alpha = 3.0, epsilon = 1e-2, gamma = 1e-200;
+	double epsilon = 1e-2, gamma = 1e-200;
 	ofstream expToFile("./expansion.txt");
 	ofstream fibToFile("./fibonacci.txt");
 	ofstream lagToFile("./lagrange.txt");
 
-	for (int i = 0; i < 100; i++)
+	double alpha, alpha_1 = 3.1, alpha_2 = 5.0, alpha_3 = 6.6;
+	double x0;
+	double d = 2.0;
+	alpha = alpha_1;
+
+	for (int i = 0; i < 300; i++)
 	{
+		x0 = -100 + (double)rand() / RAND_MAX * (200);
+
+		if (i == 100) alpha = alpha_2;
+		else if (i == 200) alpha = alpha_3;
 		ekspansja = expansion(ff1T, x0, d, alpha, Nmax);
-		cout << ekspansja[0] << endl;
 		expToFile << x0 << "\t" << ekspansja[0] << "\t" << ekspansja[1] << "\t" << solution::f_calls << endl;
 		solution::clear_calls();
 
 		solution fibonacci = fib(ff1T, ekspansja[0], ekspansja[1], epsilon);
-		fibToFile << m2d(fibonacci.x) << "\t" << m2d(fibonacci.y) << "\t" << solution::f_calls << "\t" << endl;
+		fibToFile << m2d(fibonacci.x) << "\t" << m2d(fibonacci.y) << "\t" << solution::f_calls << "\t" << fibonacci.flag << endl;
 		solution::clear_calls();
 
 		solution lagrange = lag(ff1T, ekspansja[0], ekspansja[1], epsilon, gamma, Nmax);
-		lagToFile << m2d(lagrange.x) << "\t" << m2d(lagrange.y) << "\t" << solution::f_calls << "\t" << endl;
+		lagToFile << m2d(lagrange.x) << "\t" << m2d(lagrange.y) << "\t" << solution::f_calls << "\t" << lagrange.flag << endl;
 		solution::clear_calls();
 		x0++;
-		liczba = 0;
 	}
-	
-	cout << "fib" << endl;
-	solution opt = fib(ff1T, -100, 100, epsilon);
-	cout << opt << endl;
 
-	cout << "lag" << endl;
+	ofstream fibWykres("./fibWykres.txt");
+	ofstream lagWykres("./lagWykres.txt");
+	
+	solution opt = fib(ff1T, -100, 100, epsilon);
+	fibWykres << opt << "\n\n" << opt.ud << endl;
+
 	solution opt2 = lag(ff1T, -100, 100, epsilon, gamma, Nmax);
-	cout << opt2 << endl;
+	lagWykres << opt2 << "\n\n" << opt2.ud << endl;
+
 
 }
 
