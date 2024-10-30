@@ -41,16 +41,14 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 		solution X0(x0), X1(x0 + d);
 		X0.fit_fun(ff, ud1, ud2);
 		X1.fit_fun(ff, ud1, ud2);
-		if (X0.y == X1.y)
-		{
+		if (X0.y == X1.y) {
 			p[0] = m2d(X0.x);
 			p[1] = m2d(X1.x);
 
 			return p;
 		}
 		
-		if (X1.y > X0.y)
-		{
+		if (X1.y > X0.y) {
 			d = -d;
 			X1.x = X0.x + d;
 			X1.fit_fun(ff, ud1, ud2);
@@ -62,11 +60,9 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 				return p;
 			}
 		}
-		do
-		{
-			if (solution::f_calls > Nmax)
-			{
-				X0.flag = 0;
+		do {
+			if (solution::f_calls > Nmax) {
+				X0.flag = 1;
 				return 0;
 			}	
 			i = i + 1;
@@ -74,14 +70,12 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 			X0 = X1;
 			X1.x = x0 + pow(alpha, i) * d;
 			X1.fit_fun(ff, ud1, ud2);
-		} while (X0.y >= X1.y); // <- ??
-		if (d > 0)
-		{
+		} while (X0.y >= X1.y);
+		if (d > 0) {
 			p[0] = temp;
 			p[1] = m2d(X1.x);
 		}
-		else
-		{
+		else {
 			p[1] = temp;
 			p[0] = m2d(X1.x);
 		}
@@ -113,15 +107,12 @@ solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		c.fit_fun(ff, ud1, ud2);
 		d.fit_fun(ff, ud1, ud2);
 		Xopt.ud = b - a;
-		for (int i = 0; i < k - 3; i++)
-		{
+		for (int i = 0; i < k - 3; i++) {
 
-			if (c.y < d.y)
-			{
+			if (c.y < d.y) {
 				b0 = d;
 			}
-			else
-			{
+			else {
 				a0 = c;
 			}
 
@@ -158,18 +149,8 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		b0.fit_fun(ff, ud1, ud2);
 		c0.fit_fun(ff, ud1, ud2);
 
-		// Inicjacja zapisu do pliku
-		std::ofstream logFile("lag_log.txt", std::ios::out);
-		if (logFile.is_open()) {
-			logFile << "Pocz¹tek algorytmu:\n";
-			logFile << "a0.x = " << a0.x << ", a0.y = " << a0.y << "\n";
-			logFile << "b0.x = " << b0.x << ", b0.y = " << b0.y << "\n";
-			logFile << "c0.x = " << c0.x << ", c0.y = " << c0.y << "\n\n";
-			logFile.close();
-		}
 		Xopt.ud = b - a;
-		do
-		{
+		do {
 			Xopt.ud.add_row(m2d(b0.x - a0.x));
 			l = m2d(a0.y) * m2d(pow(b0.x, 2) - pow(c0.x, 2)) +
 				m2d(b0.y) * m2d(pow(c0.x, 2) - pow(a0.x, 2)) +
@@ -179,23 +160,8 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 				m2d(b0.y) * m2d(c0.x - a0.x) +
 				m2d(c0.y) * m2d(a0.x - b0.x);
 
-			// Zapis do pliku l i m
-			logFile.open("lag_log.txt", std::ios::app);
-			if (logFile.is_open()) {
-				logFile << "Iteracja " << i << ":\n";
-				logFile << "l = " << l << ", m = " << m << "\n";
-				logFile.close();
-			}
-
-			if (m <= 0)
-			{
+			if (m <= 0) {
 				Xopt.flag = -1;
-				// Zapis b³êdu do pliku
-				logFile.open("lag_log.txt", std::ios::app);
-				if (logFile.is_open()) {
-					logFile << "B³¹d: m <= 0.\n\n";
-					logFile.close();
-				}
 				return Xopt;
 			}
 
@@ -204,48 +170,27 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			d0.fit_fun(ff, ud1, ud2);
 			di.fit_fun(ff, ud1, ud2);
 
-			// Zapis d0 i di do pliku
-			logFile.open("lag_log.txt", std::ios::app);
-			if (logFile.is_open()) {
-				logFile << "d0.x = " << d0.x << ", d0.y = " << d0.y << "\n";
-				logFile << "di.x = " << di.x << ", di.y = " << di.y << "\n\n";
-				logFile.close();
-			}
-
-			if (a0.x < d0.x && d0.x < c0.x)
-			{
-				if (d0.y < c0.y)
-				{
+			if (a0.x < d0.x && d0.x < c0.x) {
+				if (d0.y < c0.y) {
 					b0 = c0;
 					c0 = d0;
 				}
-				else
-				{
+				else {
 					a0 = d0;
 				}
 			}
-			else
-			{
-				if (c0.x < d0.x && d0.x < b0.x)
-				{
+			else {
+				if (c0.x < d0.x && d0.x < b0.x) {
 					if (d0.y < c0.y)
 					{
 						a0 = c0;
 						c0 = d0;
 					}
-					else
-					{
+					else {
 						b0 = d0;
 					}
 				}
-				else
-				{
-					// Zapis b³êdu do pliku
-					logFile.open("lag_log.txt", std::ios::app);
-					if (logFile.is_open()) {
-						logFile << "B³¹d: d0.x poza zakresem.\n\n";
-						logFile.close();
-					}
+				else {
 					Xopt = d0;
 					Xopt.flag = -1;
 					return Xopt;
@@ -255,26 +200,9 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 			i = i + 1;
 			Xopt.ud.add_row((b0.x - a0.x));
 
-			// Zapis punktów do pliku
-			logFile.open("lag_log.txt", std::ios::app);
-			if (logFile.is_open()) {
-				logFile << "Po aktualizacji:\n";
-				logFile << "a0.x = " << a0.x << ", a0.y = " << a0.y << "\n";
-				logFile << "b0.x = " << b0.x << ", b0.y = " << b0.y << "\n";
-				logFile << "c0.x = " << c0.x << ", c0.y = " << c0.y << "\n";
-				logFile << "d0.x = " << d0.x << ", d0.y = " << d0.y << "\n\n";
-				logFile.close();
-			}
-
-			if (solution::f_calls > Nmax)
-			{
-				// Zapis b³êdu do pliku
-				logFile.open("lag_log.txt", std::ios::app);
-				if (logFile.is_open()) {
-					logFile << "B³¹d: Nie znaleziono przedzia³u po " << Nmax << " próbach.\n\n";
-					logFile.close();
-				}
-				throw std::runtime_error("Nie znaleziono przedzialu po " + std::to_string(Nmax) + " probach");
+			if (solution::f_calls > Nmax) {
+				Xopt.flag = 1;
+				return 0;
 			}
 
 		} while ((b0.x - a0.x) >= epsilon && fabs(m2d(d0.x) - m2d(di.x)) >= gamma);
@@ -282,13 +210,6 @@ solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double eps
 		Xopt = d0;
 		Xopt.fit_fun(ff, ud1, ud2);
 
-		// Zapis wyniku do pliku
-		logFile.open("lag_log.txt", std::ios::app);
-		if (logFile.is_open()) {
-			logFile << "Zakoñczenie algorytmu:\n";
-			logFile << "Xopt.x = " << Xopt.x << ", Xopt.y = " << Xopt.y << "\n\n";
-			logFile.close();
-		}
 		Xopt.flag = 0;
 
 		return Xopt;
@@ -305,7 +226,38 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		solution XB, XB_, X(x0);
+		X.fit_fun(ff, ud1, ud2);
+		do
+		{
+			XB = X;
+			X = HJ_trial(ff, XB, s);
+			if (X.y < XB.y) {
+				do
+				{
+					XB_ = XB;
+					XB = X;
+					X.x = 2 * XB.x - XB_.x;
+					X.fit_fun(ff, ud1, ud2);
+					X = HJ_trial(ff, X, s);
+					if (solution::f_calls > Nmax) {
+						Xopt = XB;
+						Xopt.flag = -1;
+						return Xopt;
+					}
+				} while (X.y < XB.y);
+				X = XB;
+			}
+			else
+				s = alpha * s;
+			if (solution::f_calls > Nmax) {
+				Xopt = XB;
+				Xopt.flag = -1;
+				return Xopt;
+			}
+		} while (s >= epsilon);
+	
+		Xopt = XB;
 
 		return Xopt;
 	}
@@ -319,7 +271,23 @@ solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, ma
 {
 	try
 	{
-		//Tu wpisz kod funkcji
+		int n = get_dim(XB);
+		matrix e = ident_mat(n);
+		solution X;
+		for (int j = 0; j < n; j++) {
+			X.x = XB.x + s * e[j];
+			X.fit_fun(ff, ud1, ud2);
+
+			if (X.y < XB.y) { 
+				XB = X; 
+			}
+			else {
+				X.x = XB.x - s * e[j];
+				X.fit_fun(ff, ud1, ud2);
+
+				if (X.y < XB.y) XB = X;
+			}
+		}
 
 		return XB;
 	}

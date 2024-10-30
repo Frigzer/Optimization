@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		lab1();
+		
 	}
 	catch (string EX_INFO)
 	{

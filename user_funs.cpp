@@ -38,7 +38,6 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2)
 	matrix y;
 	double PI = 3.14;
 	y = -cos(0.1 * m2d(x)) * exp(-pow(0.1 * m2d(x) - 2 * PI, 2)) + 0.002 * pow(0.1 * x, 2);
-	//y = pow(x, 2);
 	return y;
 }
 
