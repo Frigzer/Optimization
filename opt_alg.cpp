@@ -231,7 +231,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 		do
 		{
 			XB = X;
-			X = HJ_trial(ff, XB, s);
+			X = HJ_trial(ff, XB, s, ud1, ud2);
 			if (X.y < XB.y) {
 				do
 				{
@@ -239,7 +239,7 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 					XB = X;
 					X.x = 2 * XB.x - XB_.x;
 					X.fit_fun(ff, ud1, ud2);
-					X = HJ_trial(ff, X, s);
+					X = HJ_trial(ff, X, s, ud1, ud2);
 					if (solution::f_calls > Nmax) {
 						Xopt = XB;
 						Xopt.flag = -1;
@@ -302,8 +302,62 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		int i = 0;
+		matrix dj, lambda, p;
+		solution XB(x0), X;
+		XB.fit_fun(ff, ud1, ud2);
+		int n = get_dim(XB);
+		dj = ident_mat(n);
+		lambda = matrix(n, 0.0);
+		p = matrix(n, 0.0);
+		do
+		{
+			for (int j = 0; j < n; j++)
+			{
+				X.x = XB.x + s0 * dj;
+				X.fit_fun(ff, ud1, ud2);
+				if (X.y < XB.y) {
+					XB = X;
+					lambda[j] = lambda[j] + s0;
+					s0 = alpha * s0;
+				}
+				else {
+					s0 = -beta * s0;
+					p[j] = p[j] + 1;
+				}	
+			}
 
+			i = i + 1;
+
+			X = XB;
+
+			bool reset = true;
+
+			for (int j = 0; j < n; j++) {
+				if (lambda[j] == 0 || p[j] == 0) {
+					reset = false;
+					break;
+				}
+			}
+
+			if (reset) {
+				dj = ident_mat(n);
+				lambda = matrix(n, 0.0);
+				p = matrix(n, 0.0);
+				
+			}
+			if (solution::f_calls > Nmax) {
+				Xopt = X;
+				Xopt.flag = -1;
+				return Xopt;
+			}
+			int k = 0;
+			for (int j = 0; j < n; j++) {
+				k = max(k, abs(s0));
+			}
+		} while (true);
+
+		Xopt = X;
 		return Xopt;
 	}
 	catch (string ex_info)
