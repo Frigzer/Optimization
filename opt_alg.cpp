@@ -303,27 +303,27 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	{
 		solution Xopt;
 		int i = 0;
-		matrix dj, lambda, p;
+		matrix dj, lambda, p, s;
 		solution XB(x0), X;
 		XB.fit_fun(ff, ud1, ud2);
 		int n = get_dim(XB);
 		dj = ident_mat(n);
 		lambda = matrix(n, 0.0);
 		p = matrix(n, 0.0);
+		s = matrix(s0);
 		do
 		{
-			for (int j = 0; j < n; j++)
-			{
+			for (int j = 0; j < n; j++) {
 				X.x = XB.x + s0 * dj;
 				X.fit_fun(ff, ud1, ud2);
 				if (X.y < XB.y) {
 					XB = X;
-					lambda[j] = lambda[j] + s0;
-					s0 = alpha * s0;
+					lambda(j) = lambda(j) + s(j);
+					s(j) = alpha * s(j);
 				}
 				else {
-					s0 = -beta * s0;
-					p[j] = p[j] + 1;
+					s(j) = -beta * s(j);
+					p(j) = p(j) + 1;
 				}	
 			}
 
@@ -334,17 +334,19 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 			bool reset = true;
 
 			for (int j = 0; j < n; j++) {
-				if (lambda[j] == 0 || p[j] == 0) {
+				if (lambda(j) == 0 || p(j) == 0) {
 					reset = false;
 					break;
 				}
 			}
 
 			if (reset) {
+				// TODO - zmiana bazy kierunków dj
+
 				dj = ident_mat(n);
 				lambda = matrix(n, 0.0);
 				p = matrix(n, 0.0);
-				
+				s = s0;
 			}
 			if (solution::f_calls > Nmax) {
 				Xopt = X;
@@ -353,7 +355,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 			}
 			int k = 0;
 			for (int j = 0; j < n; j++) {
-				k = max(k, abs(s0));
+				k = max(k, (int)abs(s(j)));
 			}
 		} while (true);
 
