@@ -97,3 +97,8 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 	y = abs(max - 50);
 	return y;
 }
+
+matrix ff2T(matrix x, matrix ud1, matrix ud2)
+{
+	return matrix(pow(x(0)) + pow(x(1)) - cos(2.5 * _Pi_val * x(0)) - cos(2.5 * _Pi_val * x(1)) + 2);
+}

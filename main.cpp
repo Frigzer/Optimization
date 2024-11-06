@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		
+		lab2();
 	}
 	catch (string EX_INFO)
 	{
@@ -155,12 +155,45 @@ void lab1()
 
 void lab2()
 {
+	double s = 0.77;
+	double alphaHJ = 0.5;
+	double aplhaR = 2;
+	double beta = 0.5;
+	double epsilon = 1e-3;
+	int Nmax = 1000;
+	solution opt;
+	matrix x0, s0;
+	s0 = matrix(2, 1, s);
 
+	ofstream HookeToFile("hooke.txt");
+
+	x0 = matrix(2, 1, 0.0);
+	x0(0) = -0.3;
+	x0(1) = 0;
+	s = 0.1;
+	s0 = matrix(2, 1, s);
+
+	solution xopt = Rosen(ff2T, x0, s0, aplhaR, beta, epsilon, Nmax);
+	cout << x0(0) << ";" << x0(1) << " " << xopt.x(0) << ";" << xopt.x(1) << " " << xopt.y;
+	/*
+	for (int i = 0; i < 100; i++)
+	{
+		x0 = 2 * rand_mat(2, 1) - 1;
+		solution Hooke = HJ(ff2T, x0, s, alphaHJ, epsilon, Nmax);
+		int a = solution::f_calls;
+		HookeToFile << "x0: " << x0(0) << "x: " << Hooke.x << "y: " << Hooke.y << a << ";" << Hooke.flag << ";" << endl;
+		x0(0);
+		solution::clear_calls();
+	}
+	*/
 }
 
 void lab3()
 {
+	for (int i = 0; i < 100; i++)
+	{
 
+	}
 }
 
 void lab4()

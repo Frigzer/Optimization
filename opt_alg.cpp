@@ -302,19 +302,20 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	try
 	{
 		solution Xopt;
-		int i = 0;
+		//int i = 0;
 		matrix dj, lambda, p, s;
 		solution XB(x0), X;
 		XB.fit_fun(ff, ud1, ud2);
 		int n = get_dim(XB);
 		dj = ident_mat(n);
-		lambda = matrix(n, 0.0);
-		p = matrix(n, 0.0);
+		lambda = matrix(n, 1, 0.0);
+		p = matrix(n, 1, 0.0);
 		s = matrix(s0);
+		int max_s;
 		do
 		{
 			for (int j = 0; j < n; j++) {
-				X.x = XB.x + s0 * dj;
+				X.x = XB.x + s(j) * dj[j];
 				X.fit_fun(ff, ud1, ud2);
 				if (X.y < XB.y) {
 					XB = X;
@@ -327,7 +328,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				}	
 			}
 
-			i = i + 1;
+			//i = i + 1;
 
 			X = XB;
 
@@ -341,11 +342,31 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 			}
 
 			if (reset) {
-				// TODO - zmiana bazy kierunków dj
+				matrix Q = dj;
+				matrix v = matrix(n, n);
+				matrix d_new = matrix(n, n); 
 
-				dj = ident_mat(n);
-				lambda = matrix(n, 0.0);
-				p = matrix(n, 0.0);
+				for (int j = 0; j < n; j++) {
+	
+					v[j] = Q[j];
+					for (int k = 0; k < j; k++) {
+						matrix dot_product = trans(Q[j]) * d_new[k];
+						v[j] = v[j] - dot_product * d_new[k];
+					}
+
+					double norm_vj = norm(v[j]);
+					if (norm_vj > 0) {
+						d_new[j] = v[j] / norm_vj;
+					}
+					else {
+						d_new[j] = v[j];
+					}
+				}
+
+				dj = d_new;
+
+				lambda = matrix(n, 1, 0.0);
+				p = matrix(n, 1, 0.0);
 				s = s0;
 			}
 			if (solution::f_calls > Nmax) {
@@ -353,11 +374,13 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				Xopt.flag = -1;
 				return Xopt;
 			}
-			int k = 0;
-			for (int j = 0; j < n; j++) {
-				k = max(k, (int)abs(s(j)));
+			max_s = 0;
+			for (int j = 1; j < n; j++) {
+				if (abs(s(max_s)) < abs(s(j))) {
+					max_s = j;
+				}
 			}
-		} while (true);
+		} while (abs(s(max_s)) >= epsilon);
 
 		Xopt = X;
 		return Xopt;
