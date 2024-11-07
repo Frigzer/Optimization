@@ -102,3 +102,57 @@ matrix ff2T(matrix x, matrix ud1, matrix ud2)
 {
 	return matrix(pow(x(0)) + pow(x(1)) - cos(2.5 * _Pi_val * x(0)) - cos(2.5 * _Pi_val * x(1)) + 2);
 }
+
+matrix df2(double t, matrix Y, matrix ud1, matrix ud2)
+{
+	matrix dY(2, 1);
+
+	double l = 1.0;
+	double mr = 1.0;
+	double mc = 5.0;
+	double b = 0.5;
+	double I = (mr / 3 + mc) * pow(l, 2);
+
+	double k1 = m2d(ud1);
+	double k2 = m2d(ud2);
+
+	double alpha_ref = _Pi_val;
+	double omega_ref = 0.0;
+
+	double alpha = alpha_ref - Y(0);
+	double omega = omega_ref - Y(1);
+	double Mt = k1 * alpha + k2 * omega;
+
+	dY(0) = Y(1);
+	dY(1) = (Mt - b * Y(1)) / I;
+
+	return dY;
+}
+
+matrix ff2R(matrix x, matrix ud1, matrix ud2)
+{
+	matrix Y0 = matrix(2, new double[2]{0, 0});
+
+	matrix k1 = x(0);
+	matrix k2 = x(1);
+
+	double t0 = 0.0;
+	double tend = 100.0;
+	double dt = 0.1;
+
+	matrix* Y = solve_ode(df2, t0, dt, tend, Y0, k1, k2);
+	int length = get_len(Y[0]);
+
+	double Q = 0.0;
+	for (int i = 0; i < length; i++)
+	{
+		double alpha = Y[1](i, 0) - _Pi_val;
+		double omega = Y[1](i, 1);
+
+		double Mt = m2d(k1) * alpha + m2d(k2) * omega;
+
+		Q += (10 * pow(alpha, 2) + pow(omega, 2) + pow(Mt, 2)) * dt;
+	}
+
+	return matrix(Q);
+}
