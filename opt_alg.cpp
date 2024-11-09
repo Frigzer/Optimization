@@ -228,10 +228,12 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 		solution Xopt;
 		solution XB, XB_, X(x0);
 		X.fit_fun(ff, ud1, ud2);
+		matrix ud(x0);
 		do
 		{
 			XB = X;
 			X = HJ_trial(ff, XB, s, ud1, ud2);
+			X.fit_fun(ff, ud1, ud2);
 			if (X.y < XB.y) {
 				do
 				{
@@ -255,9 +257,11 @@ solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alp
 				Xopt.flag = -1;
 				return Xopt;
 			}
+			ud.add_col(X.x);
 		} while (s >= epsilon);
 	
 		Xopt = XB;
+		Xopt.ud = ud;
 
 		return Xopt;
 	}
@@ -303,7 +307,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	{
 		solution Xopt;
 		//int i = 0;
-		matrix dj, lambda, p, s;
+		matrix dj, lambda, p, s, ud(x0);
 		solution XB(x0), X;
 		XB.fit_fun(ff, ud1, ud2);
 		int n = get_dim(XB);
@@ -328,8 +332,6 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				}	
 			}
 
-			//i = i + 1;
-
 			X = XB;
 
 			bool reset = true;
@@ -344,26 +346,21 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 			if (reset) {
 				matrix Q = dj;
 				matrix v = matrix(n, n);
-				matrix d_new = matrix(n, n); 
+				matrix d_new = ident_mat(n);
 
+				d_new = Q * d_new;
+				v.set_col(d_new[0] / norm(d_new[0]), 0);
 				for (int j = 0; j < n; j++) {
 	
-					v[j] = Q[j];
+					matrix dot_product(n, 1);
 					for (int k = 0; k < j; k++) {
-						matrix dot_product = trans(Q[j]) * d_new[k];
-						v[j] = v[j] - dot_product * d_new[k];
+						dot_product.set_col(dot_product[0] + (trans(d_new[j])) * dj[k] * dj[k], 0);
 					}
-
-					double norm_vj = norm(v[j]);
-					if (norm_vj > 0) {
-						d_new[j] = v[j] / norm_vj;
-					}
-					else {
-						d_new[j] = v[j];
-					}
+					v.set_col((d_new[j] - dot_product[0]) / norm(d_new[j] - dot_product[0]), j);
+					
 				}
 
-				dj = d_new;
+				dj = v;
 
 				lambda = matrix(n, 1, 0.0);
 				p = matrix(n, 1, 0.0);
@@ -374,6 +371,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 				Xopt.flag = -1;
 				return Xopt;
 			}
+			ud.add_col(X.x);
 			max_s = 0;
 			for (int j = 1; j < n; j++) {
 				if (abs(s(max_s)) < abs(s(j))) {
@@ -383,6 +381,7 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 		} while (abs(s(max_s)) >= epsilon);
 
 		Xopt = X;
+		Xopt.ud = ud;
 		return Xopt;
 	}
 	catch (string ex_info)

@@ -155,37 +155,75 @@ void lab1()
 
 void lab2()
 {
-	double s = 0.77;
-	double alphaHJ = 0.5;
-	double aplhaR = 2;
-	double beta = 0.5;
-	double epsilon = 1e-3;
+	srand(time(NULL));
+
+	double alpha = 2;
+	double epsilon = 1e-06;
 	int Nmax = 1000;
-	solution opt;
-	matrix x0, s0;
-	s0 = matrix(2, 1, s);
 
-	ofstream HookeToFile("hooke.txt");
+	// Dane do tabeli 1
+	ofstream x_val_tab_1("./dane/lab_02/problem_testowy/x_val_tab_1.txt");
+	ofstream hooke_tab_1("./dane/lab_02/problem_testowy/hooke_tab_1.txt");
+	ofstream rosen_tab_1("./dane/lab_02/problem_testowy/rosen_tab_1.txt");
 
-	x0 = matrix(2, 1, 0.0);
-	x0(0) = -0.3;
-	x0(1) = 0;
-	s = 0.1;
-	s0 = matrix(2, 1, s);
+	// Trzy dlugosci kroku
+	double s, s_1 = 0.7, s_2 = 0.45, s_3 = 0.1;
+	double beta = 0.5;
+	s = s_1;
+	matrix x(2, 1);
+	
+	bool wykres = false;
 
-	solution xopt = Rosen(ff2T, x0, s0, aplhaR, beta, epsilon, Nmax);
-	cout << x0(0) << ";" << x0(1) << " " << xopt.x(0) << ";" << xopt.x(1) << " " << xopt.y;
-	/*
-	for (int i = 0; i < 100; i++)
+	solution hooke2, rosen2;
+	for (int i = 0; i < 300; i++)
 	{
-		x0 = 2 * rand_mat(2, 1) - 1;
-		solution Hooke = HJ(ff2T, x0, s, alphaHJ, epsilon, Nmax);
-		int a = solution::f_calls;
-		HookeToFile << "x0: " << x0(0) << "x: " << Hooke.x << "y: " << Hooke.y << a << ";" << Hooke.flag << ";" << endl;
-		x0(0);
+		x(0) = -1 + static_cast<double>(rand()) / RAND_MAX * (2);
+		x(1) = -1 + static_cast<double>(rand()) / RAND_MAX * (2);
+
+		if (i == 100) s = s_2;
+		else if (i == 200) s = s_3;
+
+		x_val_tab_1 << x(0) << "\t" << x(1) << endl;
+
+		solution hooke1 = HJ(ff2T, x, s, beta, epsilon, Nmax);
+		hooke_tab_1 << m2d(hooke1.x(0)) << "\t" << m2d(hooke1.x(1)) << "\t" << m2d(hooke1.y) << "\t" << solution::f_calls << "\t" << endl;
 		solution::clear_calls();
+
+		solution rosen1 = Rosen(ff2T, x, matrix(2, 1, s), alpha, beta, epsilon, Nmax);
+		rosen_tab_1 << m2d(rosen1.x(0)) << "\t" << m2d(rosen1.x(1)) << "\t" << m2d(rosen1.y) << "\t" << solution::f_calls << "\t" << endl;
+		solution::clear_calls();
+
+		if (!wykres && (abs(m2d(hooke1.y)) < epsilon) && (abs(m2d(rosen1.y)) < epsilon)) {
+			wykres = true;
+			hooke2 = hooke1;
+			rosen2 = rosen1;
+		}
 	}
-	*/
+	x_val_tab_1.close();
+	hooke_tab_1.close();
+	rosen_tab_1.close();
+	
+	// Dane do wykresu
+	ofstream hooke_wykres("./dane/lab_02/problem_testowy/hooke_wykres.txt");
+	ofstream rosen_wykres("./dane/lab_02/problem_testowy/rosen_wykres.txt");
+
+
+	int* hooke2_size = get_size(hooke2.ud);
+	for (int i = 0; i < hooke2_size[1]; i++) {
+		hooke_wykres << hooke2.ud(0, i) << "\t" << hooke2.ud(1, i) << endl;
+	}
+
+	
+	int* rosen2_size = get_size(rosen2.ud);
+	for (int i = 0; i < rosen2_size[1]; i++) {
+		rosen_wykres << rosen2.ud(0, i) << "\t" << rosen2.ud(1, i) << endl;
+	}
+	
+	delete[] hooke2_size;
+	delete[] rosen2_size;
+	
+	hooke_wykres.close();
+	rosen_wykres.close();
 }
 
 void lab3()
