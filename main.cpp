@@ -212,18 +212,57 @@ void lab2()
 	for (int i = 0; i < hooke2_size[1]; i++) {
 		hooke_wykres << hooke2.ud(0, i) << "\t" << hooke2.ud(1, i) << endl;
 	}
+	solution::clear_calls();
 
 	
 	int* rosen2_size = get_size(rosen2.ud);
 	for (int i = 0; i < rosen2_size[1]; i++) {
 		rosen_wykres << rosen2.ud(0, i) << "\t" << rosen2.ud(1, i) << endl;
 	}
+	solution::clear_calls();
 	
 	delete[] hooke2_size;
 	delete[] rosen2_size;
 	
 	hooke_wykres.close();
 	rosen_wykres.close();
+
+	// Dane do tabeli 3
+	ofstream hooke_tab_3("./dane/lab_02/problem_rzeczywisty/hooke_tab_3.txt");
+	ofstream rosen_tab_3("./dane/lab_02/problem_rzeczywisty/rosen_tab_3.txt");
+
+	s = 1.0;
+	double k[2] = { 4.0, 8.0 };
+	matrix x0 = matrix(2, k);
+
+	solution hooke3 = HJ(ff2R, x0, s, beta, epsilon, Nmax);
+	hooke_tab_3 << m2d(hooke3.x(0)) << "\t" << m2d(hooke3.x(1)) << "\t" << m2d(hooke3.y) << "\t" << solution::f_calls << "\t" << hooke3.flag << endl;
+	solution::clear_calls();
+
+	solution rosen3 = Rosen(ff2R, x0, matrix(2, 1, s), alpha, beta, epsilon, Nmax);
+	rosen_tab_3 << m2d(rosen3.x(0)) << "\t" << m2d(rosen3.x(1)) << "\t" << m2d(rosen3.y) << "\t" << solution::f_calls << "\t" << rosen3.flag << endl;
+	solution::clear_calls();
+
+	hooke_tab_3.close();
+	rosen_tab_3.close();
+
+	// Dane do symulacji
+	ofstream hooke_sym("./dane/lab_02/problem_rzeczywisty/hooke_symulacja.csv");
+	ofstream rosen_sym("./dane/lab_02/problem_rzeczywisty/rosen_symulacja.csv");
+
+	matrix Y0 = matrix(2, new double[2] {0.0, 0.0});
+
+	matrix* Y_hooke = solve_ode(df2, 0, 0.1, 100, Y0, hooke3.x(0), hooke3.x(1));
+	solution::clear_calls();
+
+	matrix* Y_rosen = solve_ode(df2, 0, 0.1, 100, Y0, rosen3.x(0), rosen3.x(1));
+	solution::clear_calls();
+
+	hooke_sym << Y_hooke[1];
+	rosen_sym << Y_rosen[1];
+
+	hooke_sym.close();
+	rosen_sym.close();
 }
 
 void lab3()
