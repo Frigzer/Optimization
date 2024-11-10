@@ -231,7 +231,7 @@ void lab2()
 	ofstream hooke_tab_3("./dane/lab_02/problem_rzeczywisty/hooke_tab_3.txt");
 	ofstream rosen_tab_3("./dane/lab_02/problem_rzeczywisty/rosen_tab_3.txt");
 
-	s = 1.0;
+	s = 0.5;
 	double k[2] = { 4.0, 8.0 };
 	matrix x0 = matrix(2, k);
 
