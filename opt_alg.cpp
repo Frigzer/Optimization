@@ -306,7 +306,6 @@ solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double
 	try
 	{
 		solution Xopt;
-		//int i = 0;
 		matrix dj, lambda, p, s, ud(x0);
 		solution XB(x0), X;
 		XB.fit_fun(ff, ud1, ud2);
