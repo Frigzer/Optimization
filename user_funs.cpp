@@ -1,5 +1,7 @@
 #include"user_funs.h"
 
+const double PI = _Pi; // Wybranie tego co dziala
+
 matrix ff0T(matrix x, matrix ud1, matrix ud2)
 {
 	matrix y;
@@ -100,7 +102,7 @@ matrix ff1R(matrix x, matrix ud1, matrix ud2)
 
 matrix ff2T(matrix x, matrix ud1, matrix ud2)
 {
-	return matrix(pow(x(0)) + pow(x(1)) - cos(2.5 * _Pi_val * x(0)) - cos(2.5 * _Pi_val * x(1)) + 2);
+	return matrix(pow(x(0)) + pow(x(1)) - cos(2.5 * PI * x(0)) - cos(2.5 * PI * x(1)) + 2);
 }
 
 matrix df2(double t, matrix Y, matrix ud1, matrix ud2)
@@ -116,7 +118,7 @@ matrix df2(double t, matrix Y, matrix ud1, matrix ud2)
 	double k1 = m2d(ud1);
 	double k2 = m2d(ud2);
 
-	double alpha_ref = _Pi_val;
+	double alpha_ref = PI;
 	double omega_ref = 0.0;
 
 	double alpha = alpha_ref - Y(0);
@@ -146,7 +148,7 @@ matrix ff2R(matrix x, matrix ud1, matrix ud2)
 	double Q = 0.0;
 	for (int i = 0; i < length; i++)
 	{
-		double alpha = Y[1](i, 0) - _Pi_val;
+		double alpha = Y[1](i, 0) - PI;
 		double omega = Y[1](i, 1);
 
 		double Mt = m2d(k1) * alpha + m2d(k2) * omega;
@@ -158,7 +160,7 @@ matrix ff2R(matrix x, matrix ud1, matrix ud2)
 }
 
 matrix ff3T(matrix x, matrix ud1, matrix ud2) {
-	double y = _Pi_val * std::sqrt(m2d(pow(x(0) * _Pi_val, 2) + pow(x(1) * _Pi_val, 2)));
+	double y = PI * std::sqrt(m2d(pow(x(0) * PI, 2) + pow(x(1) * PI, 2)));
 	return sin(y) / y;
 
 }
