@@ -408,8 +408,117 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 	try
 	{
 		solution Xopt;
-		//Tu wpisz kod funkcji
+		int min = 0;
+		Xopt.flag = 0;
 
+		int n = get_dim(x0);
+	
+		matrix p(n, n + 1);
+		matrix e = ident_mat(n);
+
+		p.set_col(x0, 0);
+		for (int i = 1; i <= n; i++)
+			p.set_col(p[0] + e[i - 1] * s, i); 
+
+		solution::f_calls += 1 + n;
+		matrix f(n + 1, 1);
+		for (int i = 0; i <= n; i++)
+			f(i) = m2d(ff(p[i], ud1, ud2));
+
+		double max_diff;
+		do {
+			max_diff = 0.0;
+			int max = 0;
+			min = 0;
+			for (int i = 1; i <= n; i++) {
+				if (f(max) < f(i)) max = i;
+				if (f(min) > f(i)) min = i;
+			}
+			if (max == min) {
+				Xopt.flag = -1;
+				break;
+			}
+
+			matrix p_(n, 1);
+			for (int i = 0; i <= n; i++)
+			{
+				if (i != max) {
+					p_.set_col(p_[0] + p[i], 0);
+				}
+			}
+
+			p_.set_col(p_[0] / n, 0);
+			matrix p_odb = p_[0] + (p_[0] - p[max]) * alpha;
+
+			solution::f_calls++;
+			double f_odb = m2d(ff(p_odb, ud1, ud2));
+
+			if (f_odb < f(max))
+			{
+				matrix p_e = p_ + (p_odb[0] - p_[0]) * gamma;
+
+				solution::f_calls++;
+				double f_e = m2d(ff(p_e, ud1, ud2));
+
+				if (f_e < f_odb)
+				{
+					p.set_col(p_e[0], max);
+					f(max) = f_e;
+				}
+				else
+				{
+					p.set_col(p_odb[0], max);
+					f(max) = f_odb;
+				}
+			}
+			else
+			{
+				if (f(min) <= f_odb && f_odb < f(max))
+				{
+					p.set_col(p_odb[0], max);
+					f(max) = f_odb;
+				}
+				else
+				{
+					matrix p_z = p_[0] + (p[max] - p_[0]) * beta;
+
+					solution::f_calls++;
+					double f_z = m2d(ff(p_z, ud1, ud2));
+
+					if (f_z >= f(max))
+					{
+						for (int i = 0; i <= n; i++)
+						{
+							if (i != min) {
+								p.set_col((p[i] + p[min]) * delta, i);
+								solution::f_calls++;
+								f(i) = m2d(ff(p[i], ud1, ud2));
+							}
+						}
+					}
+					else
+					{
+						p.set_col(p_z[0], max);
+						f(max) = f_z;
+					}
+				}
+			}
+			if (solution::f_calls > Nmax)
+			{
+				Xopt.flag = -1;
+				break;
+			}
+			for (int i = 0; i <= n; i++)
+			{
+				if (i != min) {
+					double diff = norm(p[min] - p[i]);
+					if (diff > max_diff)
+						max_diff = diff;
+				}
+			}
+		} while (max_diff > epsilon);
+		Xopt.x = p[min];
+		Xopt.y = f(min);
 		return Xopt;
 	}
 	catch (string ex_info)
@@ -417,6 +526,7 @@ solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double
 		throw ("solution sym_NM(...):\n" + ex_info);
 	}
 }
+
 
 solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2)
 {

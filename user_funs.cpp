@@ -156,3 +156,9 @@ matrix ff2R(matrix x, matrix ud1, matrix ud2)
 
 	return matrix(Q);
 }
+
+matrix ff3T(matrix x, matrix ud1, matrix ud2) {
+	double y = _Pi_val * std::sqrt(m2d(pow(x(0) * _Pi_val, 2) + pow(x(1) * _Pi_val, 2)));
+	return sin(y) / y;
+
+}
