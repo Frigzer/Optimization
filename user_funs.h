@@ -22,3 +22,7 @@ matrix ff2R(matrix, matrix = NAN, matrix = NAN);
 // Lab_03
 
 matrix ff3T(matrix, matrix = NAN, matrix = NAN);
+
+// Lab_04
+
+matrix ff4T(matrix, matrix = NAN, matrix = NAN);

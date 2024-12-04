@@ -164,3 +164,8 @@ matrix ff3T(matrix x, matrix ud1, matrix ud2) {
 	return sin(y) / y;
 
 }
+
+matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+	double y = pow(x(0) + 2 * x(1) - 7, 2) + pow(2 * x(0) + x(1) - 5, 2);
+	return y;
+}
