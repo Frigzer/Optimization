@@ -1,6 +1,8 @@
 #include"user_funs.h"
 
-const double PI = _Pi; // Wybranie tego co dziala
+const double PI = 3.1415; // Wybranie tego co dziala
+
+
 
 matrix ff0T(matrix x, matrix ud1, matrix ud2)
 {
@@ -168,4 +170,19 @@ matrix ff3T(matrix x, matrix ud1, matrix ud2) {
 matrix ff4T(matrix x, matrix ud1, matrix ud2) {
 	double y = pow(x(0) + 2 * x(1) - 7, 2) + pow(2 * x(0) + x(1) - 5, 2);
 	return y;
+}
+
+matrix gf4T(matrix x, matrix ud1, matrix ud2) {
+	matrix g(2, 1);
+	g(0) = 10 * x(0) + 8 * x(1) - 34;
+	g(1) = 8 * x(0) + 10 * x(1) - 38;
+	return g;
+}
+matrix hf4T(matrix x, matrix ud1, matrix ud2) {
+	matrix H(2, 2);
+	H(0, 0) = 10;
+	H(0, 1) = 8;
+	H(1, 0) = 8;
+	H(1, 1) = 10;
+	return H;
 }

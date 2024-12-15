@@ -532,10 +532,37 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt, Xopt2,h;
+		Xopt.x = x0;
+		int n = get_len(x0);
+		int i = 0;
+		matrix d(n, 1), tran(n, 2);
+		double* range;
+		while (true)
+		{
+		
+			d = -Xopt.grad(gf, ud1, ud2);
+			if (h0 < 0) {
+
+			tran.set_col(Xopt.x, 0);
+			tran.set_col(d, 1);
+			range = expansion(ff, 0, 1, 1.2, Nmax, ud1, tran);
+			h = fib(ff, range[0], range[1], epsilon, ud1);
+			Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt = Xopt2;
+					
+		}
 		//Tu wpisz kod funkcji
 
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
@@ -547,10 +574,35 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt,Xopt2,h;
+		int n = get_len(x0);
+		Xopt.x = x0;
+		matrix d(n, 1), tran(n, 2);
+		double* range, beta;
+		d = -Xopt.grad(gf, ud1, ud2);
+		while (true) {
+			if (h0 < 0) {
+				tran.set_col(Xopt.x, 0);
+				tran.set_col(d, 2);
+				range = expansion(ff, 0, 1, 1.2, Nmax, ud1, tran);
+				h = fib(ff, range[0], range[1], epsilon, ud1);
+				Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+				//cout << X1.x(0) << ";" << X1.x(1) << endl;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt2.grad(gf);
+			beta = pow(norm(Xopt2.g), 2) / pow(norm(Xopt.g), 2);
+			d = -Xopt2.g + beta * d;
+			Xopt = Xopt2;
+		}
 		//Tu wpisz kod funkcji
-
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
@@ -563,10 +615,33 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt, Xopt2, h;
+		int n = get_len(x0);
+		Xopt.x = x0;
+		matrix d(n, 1), tran(n, 2);
+		double* range, beta;
+		while (true) {
+			Xopt.grad(gf);
+			Xopt.hess(Hf);
+			d = -inv(Xopt.H) * Xopt.g;
+			if (h0 < 0) {
+				tran[0]=Xopt.x;
+				tran[1] = d;
+				range = expansion(ff, 0, 1, 1.2, Nmax, ud1, tran);
+				h = fib(ff, range[0], range[1], epsilon, ud1);
+				Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt = Xopt2;
+		}
 		//Tu wpisz kod funkcji
-
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
