@@ -284,14 +284,15 @@ void lab3()
 
 void lab4()
 {
-	matrix x0 = 20 * rand_mat(2, 1) - 10;
+	matrix x0 = matrix(2,1,0.0);
 	const double epsilon = 1e-4;
-	const int Nmax = 10000;
+	const int Nmax = 100;
 	double h = 0.05;
 
+	cout << x0(1);
 	double resArray[100][2] = {0};
 
-	cout << SD(ff4T, gf4T, x0, h, epsilon, Nmax) << endl;
+	cout << SD(ff4T, gf4T, x0, -1, epsilon, Nmax) << endl;
 	cout << CG(ff4T, gf4T, x0, h, epsilon, Nmax) << endl;
 	cout << Newton(ff4T, gf4T, hf4T, x0, h, epsilon, Nmax) << endl;
 	
