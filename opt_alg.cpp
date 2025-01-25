@@ -39,13 +39,13 @@ double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, doub
 		int i = 0;
 		double temp = 0;
 		solution X0(x0), X1(x0 + d);
-		X0.fit_fun(ff, ud1, ud2);
-		X1.fit_fun(ff, ud1, ud2);
+		X0.fit_fun(ff,ud1,ud2);
+		cout << "passes";
+		X1.fit_fun(ff,ud1,ud2);
 		if (X0.y == X1.y) {
 			p[0] = m2d(X0.x);
 			p[1] = m2d(X1.x);
-
-			return p;
+			return p;	
 		}
 		
 		if (X1.y > X0.y) {
@@ -532,10 +532,39 @@ solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt, Xopt2,h;
+		Xopt.x = x0;
+		int n = get_len(x0);
+		int i = 0;
+		matrix d(n, 1), tran(n, 2);
+		double* range = new double[2];
+		range[1] = 0; range[0] = 1;
+		while (true)
+		{
+
+			d = -Xopt.grad(gf, ud1, ud2);
+			if (h0 < 0) {
+
+			tran.set_col(Xopt.x, 0);
+			tran.set_col(d, 1);
+			range = expansion(ff, 1, 3, 1.2, Nmax, ud1, tran);
+			cout << x0(1);
+			h = lag(ff, range[0], range[1], epsilon,0.01,Nmax,ud1,tran);
+			Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt = Xopt2;
+					
+		}
 		//Tu wpisz kod funkcji
 
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
@@ -547,10 +576,35 @@ solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, mat
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt,Xopt2,h;
+		int n = get_len(x0);
+		Xopt.x = x0;
+		matrix d(n, 1), tran(n, 2);
+		double* range, beta;
+		d = -Xopt.grad(gf, ud1, ud2);
+		while (true) {
+			if (h0 < 0) {
+				tran.set_col(Xopt.x, 0);
+				tran.set_col(d, 2);
+				range = expansion(ff, 0, 1, 1.2, Nmax, ud1, tran);
+				h = lag(ff, range[0], range[1], epsilon,0.5,Nmax, ud1);
+				Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+				//cout << X1.x(0) << ";" << X1.x(1) << endl;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt2.grad(gf);
+			beta = pow(norm(Xopt2.g), 2) / pow(norm(Xopt.g), 2);
+			d = -Xopt2.g + beta * d;
+			Xopt = Xopt2;
+		}
 		//Tu wpisz kod funkcji
-
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
@@ -563,10 +617,33 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
 {
 	try
 	{
-		solution Xopt;
+		solution Xopt, Xopt2, h;
+		int n = get_len(x0);
+		Xopt.x = x0;
+		matrix d(n, 1), tran(n, 2);
+		double* range, beta;
+		while (true) {
+			Xopt.grad(gf);
+			Xopt.hess(Hf);
+			d = -inv(Xopt.H) * Xopt.g;
+			if (h0 < 0) {
+				tran[0]=Xopt.x;
+				tran[1] = d;
+				range = expansion(ff, 0, 1, 1.2, Nmax, ud1, tran);
+				h = fib(ff, range[0], range[1], epsilon, ud1);
+				Xopt2.x = Xopt.x + h.x * d;
+			}
+			else {
+				Xopt2.x = Xopt.x + h0 * d;
+			}
+			if (norm(Xopt.x - Xopt2.x) < epsilon || solution::g_calls > Nmax) {
+				Xopt2.fit_fun(ff, ud1, ud2);
+				Xopt2.flag = 0;
+				return Xopt2;
+			}
+			Xopt = Xopt2;
+		}
 		//Tu wpisz kod funkcji
-
-		return Xopt;
 	}
 	catch (string ex_info)
 	{
@@ -822,6 +899,7 @@ solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, in
 
 		} // koniec while
 
+		//Tu wpisz kod funkcji
 		return Xopt;
 	}
 	catch (string ex_info)

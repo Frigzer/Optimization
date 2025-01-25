@@ -23,6 +23,7 @@ int main()
 	try
 	{
 		lab6();
+		lab4();
 	}
 	catch (string EX_INFO)
 	{
@@ -284,7 +285,24 @@ void lab3()
 
 void lab4()
 {
+	matrix x0 = matrix(2,1,0.0);
+	const double epsilon = 1e-4;
+	const int Nmax = 100;
+	double h = 0.05;
 
+	cout << x0(1);
+	double resArray[100][2] = {0};
+
+	cout << SD(ff4T, gf4T, x0, -1, epsilon, Nmax) << endl;
+	cout << CG(ff4T, gf4T, x0, h, epsilon, Nmax) << endl;
+	cout << Newton(ff4T, gf4T, hf4T, x0, h, epsilon, Nmax) << endl;
+	
+	for (int i = 0; i < 100; i++) {
+
+		x0 = 20 * rand_mat(2, 1) - 10; // generowanie punktow znajdujacych sie w obszarze funkcji
+		resArray[i][0] = x0(0);
+		resArray[i][1] = x0(1);
+	}
 }
 
 void lab5()
