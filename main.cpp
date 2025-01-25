@@ -22,7 +22,7 @@ int main()
 {
 	try
 	{
-		lab3();
+		lab6();
 	}
 	catch (string EX_INFO)
 	{
@@ -294,5 +294,54 @@ void lab5()
 
 void lab6()
 {
+	srand(time(NULL));
 
+	// Dane do tabeli 1
+	ofstream tab_1("./dane/lab_06/problem_testowy/tab_1.txt");
+
+	// Trzy dlugosci kroku
+	double s, s_1 = 0.01, s_2 = 0.1, s_3 = 1, s_4 = 10, s_5 = 100;
+
+	double epsilon = 1e-2;
+	int mi = 5;
+	int lambda = 10;
+	int Nmax = 10000;
+
+	int N = 2;
+	matrix lb(N, 1), ub(N, 1);
+	for (int i = 0; i < N; i++)
+	{
+		lb(i, 0) = -5.0;
+		ub(i, 0) = 5.0;
+	}
+
+	s = s_1;
+	matrix sigma0(N, 1);
+	for (int d = 0; d < N; d++)
+	{
+		sigma0(d, 0) = s;
+	}
+
+	//solution EA1 = EA(ff6T, N, lb, ub, mi, lambda, sigma0, epsilon, Nmax);
+	//std::cout << m2d(EA1.x(0)) << "\t" << m2d(EA1.x(1)) << "\t" << m2d(EA1.y) << "\t" << solution::f_calls << "\t" << endl;
+	
+	for (int i = 0; i < 500; i++)
+	{
+		if (i == 100) s = s_2;
+		else if (i == 200) s = s_3;
+		else if (i == 300) s = s_4;
+		else if (i == 400) s = s_5;
+
+		for (int d = 0; d < N; d++)
+		{
+			sigma0(d, 0) = s;
+		}
+
+		solution EA1 = EA(ff6T, N, lb, ub, mi, lambda, sigma0, epsilon, Nmax);
+		tab_1 << m2d(EA1.x(0)) << "\t" << m2d(EA1.x(1)) << "\t" << m2d(EA1.y) << "\t" << solution::f_calls << "\t" << endl;
+		solution::clear_calls();
+
+	}
+	
+	
 }
