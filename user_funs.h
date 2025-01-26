@@ -91,7 +91,6 @@ matrix hf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
 //    }
 //
 //};
-matrix ff3T(matrix x, matrix = NAN, matrix = NAN);
 
 // Lab_06
 

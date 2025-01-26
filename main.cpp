@@ -23,7 +23,6 @@ int main()
 	try
 	{
 		lab6();
-		lab4();
 	}
 	catch (string EX_INFO)
 	{
@@ -310,14 +309,59 @@ void lab5()
 
 }
 
+// Funkcja do wczytania danych z pliku
+matrix loadPositions(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		std::cerr << "Nie mo¿na otworzyæ pliku: " << filename << std::endl;
+		return matrix();
+	}
+
+	std::vector<double> x1_vals;
+	std::vector<double> x2_vals;
+	std::string line;
+
+	while (std::getline(file, line))
+	{
+		std::replace(line.begin(), line.end(), ',', '.');
+		std::replace(line.begin(), line.end(), ';', ' ');
+
+		std::istringstream iss(line);
+		double x1, x2;
+		if (iss >> x1 >> x2)
+		{
+			x1_vals.push_back(x1);
+			x2_vals.push_back(x2);
+		}
+	}
+
+	file.close();
+
+	// Tworzenie macierzy na podstawie wczytanych danych
+	int rows = x1_vals.size();
+	matrix data_matrix(rows, 2);
+
+	for (int i = 0; i < rows; ++i)
+	{
+		data_matrix(i, 0) = x1_vals[i];
+		data_matrix(i, 1) = x2_vals[i];
+	}
+
+	return data_matrix;
+}
+
 void lab6()
 {
 	srand(time(NULL));
 
+	// Problem testowy
+
 	// Dane do tabeli 1
 	ofstream tab_1("./dane/lab_06/problem_testowy/tab_1.txt");
 
-	// Trzy dlugosci kroku
+	// Sigma
 	double s, s_1 = 0.01, s_2 = 0.1, s_3 = 1, s_4 = 10, s_5 = 100;
 
 	double epsilon = 1e-2;
@@ -339,9 +383,6 @@ void lab6()
 	{
 		sigma0(d, 0) = s;
 	}
-
-	//solution EA1 = EA(ff6T, N, lb, ub, mi, lambda, sigma0, epsilon, Nmax);
-	//std::cout << m2d(EA1.x(0)) << "\t" << m2d(EA1.x(1)) << "\t" << m2d(EA1.y) << "\t" << solution::f_calls << "\t" << endl;
 	
 	for (int i = 0; i < 500; i++)
 	{
@@ -357,9 +398,37 @@ void lab6()
 
 		solution EA1 = EA(ff6T, N, lb, ub, mi, lambda, sigma0, epsilon, Nmax);
 		tab_1 << m2d(EA1.x(0)) << "\t" << m2d(EA1.x(1)) << "\t" << m2d(EA1.y) << "\t" << solution::f_calls << "\t" << endl;
-		solution::clear_calls();
 
 	}
-	
-	
+	tab_1.close();
+
+	// Problem rzeczywisty
+
+	// Dane do tabeli 3
+	ofstream tab_3("./dane/lab_06/problem_rzeczywisty/tab_3.txt");
+
+	N = 2;
+	for (int i = 0; i < N; i++)
+	{
+		lb(i, 0) = 0.1;
+		ub(i, 0) = 3.0;
+	}
+
+	s = 0.1;
+	for (int d = 0; d < N; d++)
+	{
+		sigma0(d, 0) = s;
+	}
+
+	solution::clear_calls();
+
+	matrix ud1 = NAN;
+	matrix ud2 = loadPositions("polozenia.txt");
+
+	solution EA3 = EA(ff6R, N, lb, ub, mi, lambda, sigma0, epsilon, Nmax, ud1, ud2);
+
+	cout << EA3 << endl;
+	tab_3 << m2d(EA3.x(0)) << "\t" << m2d(EA3.x(1)) << "\t" << m2d(EA3.y) << "\t" << solution::f_calls << "\t" << endl;
+
+	tab_3.close();
 }

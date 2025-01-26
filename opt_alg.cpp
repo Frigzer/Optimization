@@ -693,46 +693,38 @@ solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, in
 		double alpha = pow(static_cast<double>(N), -0.5);
 		double beta = pow(2.0 * N, -0.25);
 
-		// Zerujemy liczniki (o ile chcemy śledzić f_calls)
+		// Zerujemy liczniki
 		solution::clear_calls();
 
-		// ========================
-		// Funkcje do losowania (lokalnie, bez makr)
-		// ========================
+		// Funkcje do losowania
 		auto randU = []() -> double {
-			// U(0,1)
 			return (double)rand() / (double)RAND_MAX;
 			};
 
 		auto randN = [&]() -> double {
-			// N(0,1) metodą Box-Muller (wersja uproszczona)
 			double u1 = randU();
 			double u2 = randU();
 			return sqrt(-2.0 * log(u1)) * cos(2.0 * 3.1415 * u2);
 			};
 
-		// ========================
 		// 1) Inicjalizacja populacji
-		// ========================
 		vector<solution> P(mi);
 
 		for (int j = 0; j < mi; j++) {
-			// Tworzymy osobnika s z wektorem x (N×1)
+
 			solution s(matrix(N, 1));
-			// Rezerwujemy w s.ud miejsce na wektor sigma (N×1)
+
 			s.ud = matrix(N, 1);
 
 			// Losujemy każdą współrzędną x(d,0) w przedziale [ lb(d,0), ub(d,0) ]
-			for (int d = 0; d < N; d++)
-			{
+			for (int d = 0; d < N; d++) {
 				double r = randU();
 				double xd = lb(d, 0) + r * (ub(d, 0) - lb(d, 0));
 				s.x(d, 0) = xd;
-				// Początkowa sigma
+
 				s.ud(d, 0) = sigma0(d, 0);
 			}
 
-			// Wywołujemy funkcję celu, aby mieć y = f(x)
 			s.fit_fun(ff, ud1, ud2);
 
 			// Jeśli już na etapie inicjalizacji przekroczymy limit wywołań ff:
@@ -746,8 +738,7 @@ solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, in
 		auto bestIndex = [&](const vector<solution>& pop) {
 			int bIdx = 0;
 			double bVal = pop[0].y(0, 0);
-			for (int j = 1; j < (int)pop.size(); j++)
-			{
+			for (int j = 1; j < (int)pop.size(); j++) {
 				double val = pop[j].y(0, 0);
 				if (val < bVal)
 				{
@@ -758,148 +749,120 @@ solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, in
 			return bIdx;
 			};
 
-		// ========================
 		// Główna pętla
-		// ========================
-		while (true)
-		{
-			// Sprawdzamy warunek stopu
+		while (true) {
 			int bIdxPop = bestIndex(P);
 			double fBest = P[bIdxPop].y(0, 0);
 
-			// Czy f(x*) <= epsilon?
-			if (fBest <= epsilon)
-			{
-				// Sukces
+			if (fBest <= epsilon) {
 				P[bIdxPop].flag = 0;
 				Xopt = P[bIdxPop];
 				Xopt.flag = 0;
 				return Xopt;
 			}
 
-			// Czy przekroczyliśmy Nmax wywołań funkcji celu?
-			if (solution::f_calls >= Nmax)
-			{
-				// Koniec – limit wyczerpany
+			if (solution::f_calls >= Nmax) {
 				Xopt = P[bIdxPop];
 				Xopt.flag = -1;
 				return Xopt;
 			}
 
-			// ========================
-			// 2) Koło ruletki: fi_j = 1 / f_j
-			// ========================
+			// 2) Koło ruletki
 			vector<double> fi(mi), q(mi + 1, 0.0);
-			double sumFi = 0.0;
-			for (int j = 0; j < mi; j++)
-			{
+			double suma_Fi = 0.0;
+			for (int j = 0; j < mi; j++) {
 				double fj = P[j].y(0, 0);
 				fi[j] = 1.0 / fj;
-				sumFi += fi[j];
+				suma_Fi += fi[j];
 			}
-			for (int j = 1; j <= mi; j++)
-			{
-				q[j] = q[j - 1] + (fi[j - 1] / sumFi);
+			for (int j = 1; j <= mi; j++) {
+				q[j] = q[j - 1] + (fi[j - 1] / suma_Fi);
 			}
 
-			// ========================
 			// 3) Generowanie potomstwa (lambda)
-			// ========================
-			vector<solution> offspring(lambda);
+			vector<solution> potomek(lambda);
 
-			for (int off = 0; off < lambda; off++)
-			{
-				// Wybór rodzica A
-				double rA = randU();
+			for (int off = 0; off < lambda; off++) {
+				// Wybór pierwszego rodzica
+				double r1 = randU();
 				int idxA = 0;
-				for (int j = 1; j <= mi; j++)
-				{
-					if (rA <= q[j])
+				for (int j = 1; j <= mi; j++) {
+					if (r1 <= q[j])
 					{
 						idxA = j - 1;
 						break;
 					}
 				}
-				// Wybór rodzica B
-				double rB = randU();
+				// Wybór drugiego rodzica
+				double r2 = randU();
 				int idxB = 0;
-				for (int j = 1; j <= mi; j++)
-				{
-					if (rB <= q[j])
+				for (int j = 1; j <= mi; j++) {
+					if (r2 <= q[j])
 					{
 						idxB = j - 1;
 						break;
 					}
 				}
-				// Krzyżowanie: child.x(d,0) = A.x(d,0) + (1-rC)*B.x(d,0)
-				double rC = randU();
-				solution child(matrix(N, 1));
-				child.ud = matrix(N, 1);
+				// Krzyżowanie
+				double r3 = randU();
+				solution T(matrix(N, 1));
+				T.ud = matrix(N, 1);
 
-				for (int d = 0; d < N; d++)
-				{
+				for (int d = 0; d < N; d++) {
 					double xA = P[idxA].x(d, 0);
 					double xB = P[idxB].x(d, 0);
 					double sA = P[idxA].ud(d, 0);
 					double sB = P[idxB].ud(d, 0);
 
-					child.x(d, 0) = xA + (1.0 - rC) * xB;
-					// Sigma np. średnia
-					child.ud(d, 0) = 0.5 * (sA + sB);
+					T.x(d, 0) = xA + (1.0 - r3) * xB;
+
+					T.ud(d, 0) = 0.5 * (sA + sB);
 				}
 
-				// Mutacja samoadaptacyjna
-				double globalN = randN(); // globalne N(0,1)
-				for (int d = 0; d < N; d++)
-				{
+				// Mutacja
+				double globalN = randN();
+				for (int d = 0; d < N; d++) {
 					double localN = randN();
-					double sigma_old = child.ud(d, 0);
+					double sigma_old = T.ud(d, 0);
 
 					// sigma_d = sigma_d * exp(alpha*gN + beta*lN)
 					double sigma_new = sigma_old * exp(alpha * globalN + beta * localN);
-					child.ud(d, 0) = sigma_new;
+					T.ud(d, 0) = sigma_new;
 
-					// x_d = x_d + sigma_d * N(0,1)
 					double step = sigma_new * randN();
-					child.x(d, 0) += step;
+					T.x(d, 0) += step;
 
 					// Granice
-					if (child.x(d, 0) < lb(d, 0))
-						child.x(d, 0) = lb(d, 0);
-					if (child.x(d, 0) > ub(d, 0))
-						child.x(d, 0) = ub(d, 0);
+					if (T.x(d, 0) < lb(d, 0))
+						T.x(d, 0) = lb(d, 0);
+					if (T.x(d, 0) > ub(d, 0))
+						T.x(d, 0) = ub(d, 0);
 				}
 
-				// Obliczamy f(child.x)
-				child.fit_fun(ff, ud1, ud2);
+				T.fit_fun(ff, ud1, ud2);
 
-				offspring[off] = child;
+				potomek[off] = T;
 			}
 
-			// ========================
-		   // 4) Selekcja (μ+λ) -> μ
-		   // ========================
-			vector<solution> combined;
-			combined.reserve(mi + lambda);
+		   // 4) Selekcja
+			vector<solution> x;
+			x.reserve(mi + lambda);
 
-			// stare osobniki:
+
 			for (int i = 0; i < mi; i++)
-				combined.push_back(P[i]);
-			// potomki
-			for (int i = 0; i < lambda; i++)
-				combined.push_back(offspring[i]);
+				x.push_back(P[i]);
 
-			// Sortowanie rosnąco po y(0,0)
-			std::sort(combined.begin(), combined.end(),
+			for (int i = 0; i < lambda; i++)
+				x.push_back(potomek[i]);
+
+			std::sort(x.begin(), x.end(),
 				[&](const solution& A, const solution& B) { return A.y(0, 0) < B.y(0, 0); });
 
-			// Pierwsze mi -> nowa populacja
 			for (int i = 0; i < mi; i++)
-				P[i] = combined[i];
+				P[i] = x[i];
 
-		} // koniec while
+		}
 
-		//Tu wpisz kod funkcji
 		return Xopt;
 	}
 	catch (string ex_info)

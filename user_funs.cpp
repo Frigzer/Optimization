@@ -192,17 +192,19 @@ matrix hf4T(matrix x, matrix ud1, matrix ud2) {
 	H(1, 1) = 10;
 	return H;
 }
-}
 
 matrix ff6T(matrix x, matrix ud1, matrix ud2) {
-	static double d_2o5_pi = 2.5 * _Pi_val;
-	return x(0) * x(0) + x(1) * x(1) - cos(d_2o5_pi * x(0)) - cos(d_2o5_pi * x(1)) + 2.0;
+	return x(0) * x(0) + x(1) * x(1) - cos(2.5 * PI * x(0)) - cos(2.5 * PI * x(1)) + 2.0;
 }
 
 matrix df6(double t, matrix Y, matrix ud1, matrix ud2)
 {
-	double m1 = 5.0, m2 = 5.0;
-	double k1 = 1.0, k2 = 1.0;
+	double m1 = 5.0;
+	double m2 = 5.0;
+
+	double k1 = 1.0;
+	double k2 = 1.0;
+
 	double F = 1.0;
 
 	double b1 = ud1(0, 0);
@@ -217,10 +219,10 @@ matrix df6(double t, matrix Y, matrix ud1, matrix ud2)
 	double a2 = (F + b2 * (v1 - v2) + k2 * (x1 - x2)) / m2;
 
 	matrix dY(4, 1);
-	dY(0, 0) = v1; // dx1/dt = v1
-	dY(1, 0) = a1; // dv1/dt = a1
-	dY(2, 0) = v2; // dx2/dt = v2
-	dY(3, 0) = a2; // dv2/dt = a2
+	dY(0, 0) = v1;
+	dY(1, 0) = a1;
+	dY(2, 0) = v2;
+	dY(3, 0) = a2;
 
 	return dY;
 }
@@ -229,24 +231,24 @@ matrix ff6R(matrix x, matrix ud1, matrix ud2)
 {
 	double b1 = x(0, 0);
 	double b2 = x(1, 0);
-	matrix experimentalData = ud2;
+	matrix positions = ud2;
 
 	double dt = 0.1;
-	double T = 100.0;
+	double tend = 100.0;
 	double t0 = 0.0;
 
 	// Pocz¹tkowe wartoœci
 	matrix Y0(4, 1);
-	Y0(0, 0) = 0.0; // pozycja x1
-	Y0(1, 0) = 0.0; // prêdkoœæ v1
-	Y0(2, 0) = 0.0; // pozycja x2
-	Y0(3, 0) = 0.0; // prêdkoœæ v2
+	Y0(0, 0) = 0.0;
+	Y0(1, 0) = 0.0;
+	Y0(2, 0) = 0.0;
+	Y0(3, 0) = 0.0;
 
-	matrix* S = solve_ode(df6, t0, dt, T, Y0, x);
+	matrix* S = solve_ode(df6, t0, dt, tend, Y0, x);
 
 	// Wyniki równania ró¿niczkowego
-	matrix time = S[0];      // Kroki czasowe
-	matrix positions = S[1]; // Pozycje x1, x2
+	matrix time = S[0];
+	matrix positions = S[1];
 
 	int numPoints = get_len(time);
 
@@ -256,10 +258,10 @@ matrix ff6R(matrix x, matrix ud1, matrix ud2)
 	{
 		double sim_x1 = positions(i, 0);
 		double sim_x2 = positions(i, 2);
-		double exp_x1 = experimentalData(i, 0);
-		double exp_x2 = experimentalData(i, 1);
+		double ref_x1 = positions(i, 0);
+		double ref_x2 = positions(i, 1);
 
-		error += pow(sim_x1 - exp_x1, 2) + pow(sim_x2 - exp_x2, 2);
+		error += pow(sim_x1 - ref_x1, 2) + pow(sim_x2 - ref_x2, 2);
 	}
 
 	// Sprawdzamy, czy aktualna para b1, b2 jest najlepsza
@@ -277,20 +279,14 @@ matrix ff6R(matrix x, matrix ud1, matrix ud2)
 		best_b2 = b2;
 	}
 
-	std::ofstream file("output/lab6/wyniki_symulacji_p6.csv");
-	if (!file.is_open())
-	{
-		std::cerr << "B³¹d otwierania pliku do zapisu!" << std::endl;
-		return matrix(1, 1, 1e9); // B³¹d zwracany jako du¿a wartoœæ
-	}
+	std::ofstream sym("./dane/lab_06/problem_rzeczywisty/wyniki_symulacji.txt");
 
-	file << "t[s],x1,x2\n";
 	for (int i = 0; i < get_len(best_time); ++i)
 	{
-		file << best_time(i, 0) << "," << best_positions(i, 0) << "," << best_positions(i, 2) << "\n";
+		sym << best_positions(i, 0) << "\t" << best_positions(i, 2) << "\t" << endl;
 	}
 
-	file.close();
+	sym.close();
 
 	delete[] S;
 
